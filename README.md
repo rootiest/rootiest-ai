@@ -72,6 +72,11 @@ Three-phase execution:
 
 The intended usage is a single `curl | bash` command. The installer fetches and runs `install.sh` directly — no clone required.
 
+> [!TIP]
+> The short-url `https://url.rootiest.dev/skills` can be substituted for the full URL in the examples below.  
+> e.g.  
+> `curl -sL https://url.rootiest.dev/skills | bash -s -- --all`
+
 **Install all skills for both Claude Code and Gemini CLI:**
 
 ```bash
