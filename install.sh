@@ -191,7 +191,7 @@ fetch_skill() {
 # ── Install to Claude Code ────────────────────────────────────────────────────
 install_to_claude() {
   local skill_name="$1"
-  local dest="${CLAUDE_SKILLS_DIR}/${skill_name}.md"
+  local dest="${CLAUDE_SKILLS_DIR}/${skill_name}/SKILL.md"
 
   info "[Claude] Downloading ${BOLD}${skill_name}${RESET}..."
 
@@ -201,7 +201,7 @@ install_to_claude() {
     return 1
   fi
 
-  mkdir -p "$CLAUDE_SKILLS_DIR"
+  mkdir -p "${CLAUDE_SKILLS_DIR}/${skill_name}"
   printf '%s\n' "$content" > "$dest"
   ok "[Claude] ${BOLD}${skill_name}${RESET} → ${DIM}${dest}${RESET}"
 }
@@ -209,7 +209,7 @@ install_to_claude() {
 # ── Install to Gemini CLI ─────────────────────────────────────────────────────
 install_to_gemini() {
   local skill_name="$1"
-  local dest="${GEMINI_SKILLS_DIR}/${skill_name}.md"
+  local dest="${GEMINI_SKILLS_DIR}/${skill_name}/SKILL.md"
 
   info "[Gemini] Downloading ${BOLD}${skill_name}${RESET}..."
 
@@ -219,7 +219,7 @@ install_to_gemini() {
     return 1
   fi
 
-  mkdir -p "$GEMINI_SKILLS_DIR"
+  mkdir -p "${GEMINI_SKILLS_DIR}/${skill_name}"
   printf '%s\n' "$content" > "$dest"
   ok "[Gemini] ${BOLD}${skill_name}${RESET} → ${DIM}${dest}${RESET}"
 }
