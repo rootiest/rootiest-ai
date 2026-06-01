@@ -1,6 +1,6 @@
 # Rootiest Skills Repository
 
-A collection of reusable AI skills (structured prompt protocols) for **Claude Code** and **Gemini CLI**. Each skill defines a precise execution protocol that guides the AI through complex, multi-step tasks — replacing ad-hoc prompting with consistent, auditable workflows.
+A collection of reusable AI skills (structured prompt protocols) for **Claude Code** and **Antigravity CLI**. Each skill defines a precise execution protocol that guides the AI through complex, multi-step tasks — replacing ad-hoc prompting with consistent, auditable workflows.
 
 Skills are plain Markdown files. The included `install.sh` script handles discovery and installation in a single command.
 
@@ -12,6 +12,7 @@ Skills are plain Markdown files. The included `install.sh` script handles discov
   - [systematic-enumeration](#systematic-enumeration)
   - [git-publish-workflow](#git-publish-workflow)
   - [readme-sync-audit](#readme-sync-audit)
+  - [ship-it](#ship-it)
 - [Installation](#installation)
   - [Quick Install (curl)](#quick-install-curl)
   - [Flags & Options](#flags--options)
@@ -66,6 +67,19 @@ Three-phase execution:
 
 ---
 
+### `ship-it`
+
+**Purpose:** Run a comprehensive pre-flight audit and publish changes to a new PR in a single command.
+
+Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
+
+1. **Documentation Sync & Code Audit** — acts as `/readme-sync-audit`: scans all file changes since the last README edit, updates the README to match the current codebase, and audits code files for syntax errors or regressions. **Halts the entire workflow** if any breaking issue is found.
+2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a descriptively named branch, commits all pending changes (including the README updates from Phase 1), pushes to the remote, and opens a Pull Request against `main`.
+
+**Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
+
+---
+
 ## Installation
 
 ### Quick Install (curl)
@@ -76,7 +90,7 @@ The intended usage is a single `curl | bash` command. The installer fetches and 
 > The short-url `https://url.rootiest.dev/skills` can be substituted for the full URL in the examples below.  
 > e.g. `curl -sL https://url.rootiest.dev/skills | bash -s -- --all`
 
-**Install all skills for both Claude Code and Gemini CLI:**
+**Install all skills for both Claude Code and Antigravity CLI:**
 
 ```bash
 curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all
@@ -88,10 +102,10 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all --claude
 ```
 
-**Install all skills for Gemini CLI only:**
+**Install all skills for Antigravity CLI only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all --gemini
+curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all --antigravity
 ```
 
 **Install a single skill for both tools:**
@@ -106,10 +120,10 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow readme-sync-audit
 ```
 
-**Install specific skills for Gemini CLI only:**
+**Install specific skills for Antigravity CLI only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --gemini systematic-enumeration git-publish-workflow
+curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration git-publish-workflow
 ```
 
 > **Note:** Providing explicit skill names alongside `--all` causes the named skills to take precedence — only those skills are installed.
@@ -121,12 +135,13 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 | Flag | Description |
 |---|---|
 | `-c`, `--claude` | Install into Claude Code (`~/.claude/skills/`) |
-| `-g`, `--gemini` | Install into Gemini CLI (`~/.gemini/skills/`) |
+| `-g`, `--antigravity` | Install into Antigravity CLI (`~/.gemini/antigravity-cli/skills/`) |
 | `-a`, `--all` | Install every skill available in the repository |
 | `SKILL...` | Install one or more named skills (positional arguments) |
+| `-l`, `--list` | List all available skills with descriptions and exit |
 | `-h`, `--help` | Show the help page |
 
-**Tool targeting:** if neither `--claude` nor `--gemini` is specified, the installer targets **both** tools by default.
+**Tool targeting:** if neither `--claude` nor `--antigravity` is specified, the installer targets **both** tools by default.
 
 **Skill selection precedence:** explicit skill names always override `--all`. Passing `--all skill-name` installs only `skill-name`, not every skill.
 
@@ -139,7 +154,7 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 | Variable | Default | Description |
 |---|---|---|
 | `CLAUDE_SKILLS_DIR` | `~/.claude/skills` | Override the Claude Code install directory |
-| `GEMINI_SKILLS_DIR` | `~/.gemini/skills` | Override the Gemini CLI install directory |
+| `ANTIGRAVITY_SKILLS_DIR` | `~/.gemini/antigravity-cli/skills` | Override the Antigravity CLI install directory. Falls back to `GEMINI_SKILLS_DIR` if set (legacy support). |
 
 Example — installing to a project-local skills directory:
 
@@ -159,8 +174,8 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 # Install one skill, Claude only
 curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow
 
-# Install two skills, Gemini only
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --gemini systematic-enumeration readme-sync-audit
+# Install two skills, Antigravity only
+curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration readme-sync-audit
 
 # Override install directory, Claude only
 curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh \
@@ -188,7 +203,7 @@ Or clone the repository and run locally:
 
 ```bash
 git clone https://git.rootiest.dev/rootiest/ai-skills.git
-cd claude-skills
+cd ai-skills
 bash install.sh --all
 ```
 

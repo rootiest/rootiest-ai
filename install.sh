@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # install.sh — AI Skill Installer
-# Install skills from rootiest/ai-skills into Claude Code and/or Gemini CLI
+# Install skills from rootiest/ai-skills into Claude Code and/or Antigravity CLI
 #
 # Usage: bash <(curl -sL <url>) [OPTIONS] [SKILL...]
 
@@ -13,7 +13,8 @@ readonly API_URL="https://git.rootiest.dev/api/v1/repos/rootiest/ai-skills/conte
 
 # Overridable via environment
 CLAUDE_SKILLS_DIR="${CLAUDE_SKILLS_DIR:-${HOME}/.claude/skills}"
-GEMINI_SKILLS_DIR="${GEMINI_SKILLS_DIR:-${HOME}/.gemini/skills}"
+# ANTIGRAVITY_SKILLS_DIR takes precedence; fall back to GEMINI_SKILLS_DIR for legacy support
+ANTIGRAVITY_SKILLS_DIR="${ANTIGRAVITY_SKILLS_DIR:-${GEMINI_SKILLS_DIR:-${HOME}/.gemini/antigravity-cli/skills}}"
 
 # ── ANSI Colors (only when writing to a terminal) ─────────────────────────────
 if [[ -t 1 ]]; then
@@ -31,9 +32,11 @@ fi
 
 # ── State ─────────────────────────────────────────────────────────────────────
 INSTALL_CLAUDE=false
-INSTALL_GEMINI=false
+INSTALL_ANTIGRAVITY=false
 INSTALL_ALL=false
+LIST_SKILLS=false
 declare -a SKILLS=()
+DESCRIPTIONS_JSON=""
 TMP_DIR=""
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────
@@ -55,16 +58,16 @@ sep()     { printf "${BOLD_CYAN}%s${RESET}\n" "───────────
 show_help() {
   printf "\n"
   printf "${BOLD_CYAN}  AI Skill Installer${RESET}\n"
-  printf "${DIM}  Install skills from rootiest/ai-skills into Claude Code and Gemini CLI${RESET}\n"
+  printf "${DIM}  Install skills from rootiest/ai-skills into Claude Code and Antigravity CLI${RESET}\n"
   printf "\n"
   printf "${BOLD}  USAGE${RESET}\n"
   printf "    install.sh [OPTIONS] [SKILL...]\n"
   printf "    bash <(curl -sL <url>/install.sh) [OPTIONS] [SKILL...]\n"
   printf "\n"
   printf "${BOLD}  TOOL TARGETS${RESET}\n"
-  printf "    ${GREEN}-c, --claude${RESET}    Install into Claude Code  (\$CLAUDE_SKILLS_DIR)\n"
-  printf "    ${GREEN}-g, --gemini${RESET}    Install into Gemini CLI   (\$GEMINI_SKILLS_DIR)\n"
-  printf "    ${DIM}                (default: install for both tools)${RESET}\n"
+  printf "    ${GREEN}-c, --claude${RESET}        Install into Claude Code      (\$CLAUDE_SKILLS_DIR)\n"
+  printf "    ${GREEN}-g, --antigravity${RESET}   Install into Antigravity CLI  (\$ANTIGRAVITY_SKILLS_DIR)\n"
+  printf "    ${DIM}                    (default: install for both tools)${RESET}\n"
   printf "\n"
   printf "${BOLD}  SKILL SELECTION${RESET}\n"
   printf "    ${GREEN}-a, --all${RESET}       Install every skill in the repository\n"
@@ -72,6 +75,7 @@ show_help() {
   printf "    ${DIM}                Specific names always override --all${RESET}\n"
   printf "\n"
   printf "${BOLD}  OTHER${RESET}\n"
+  printf "    ${GREEN}-l, --list${RESET}      List all available skills and exit\n"
   printf "    ${GREEN}-h, --help${RESET}      Show this help page\n"
   printf "\n"
   printf "${BOLD}  EXAMPLES${RESET}\n"
@@ -81,15 +85,16 @@ show_help() {
   printf "    ${DIM}# Install one skill, Claude Code only${RESET}\n"
   printf "    install.sh --claude my-skill\n"
   printf "\n"
-  printf "    ${DIM}# Install two skills, Gemini CLI only${RESET}\n"
-  printf "    install.sh --gemini skill-one skill-two\n"
+  printf "    ${DIM}# Install two skills, Antigravity CLI only${RESET}\n"
+  printf "    install.sh --antigravity skill-one skill-two\n"
   printf "\n"
   printf "    ${DIM}# Named skills override --all (only those listed are installed)${RESET}\n"
   printf "    install.sh --all --claude skill-name\n"
   printf "\n"
   printf "${BOLD}  ENVIRONMENT${RESET}\n"
-  printf "    ${GREEN}CLAUDE_SKILLS_DIR${RESET}   Claude skills directory  (default: ~/.claude/skills)\n"
-  printf "    ${GREEN}GEMINI_SKILLS_DIR${RESET}   Gemini skills directory  (default: ~/.gemini/skills)\n"
+  printf "    ${GREEN}CLAUDE_SKILLS_DIR${RESET}        Claude skills directory      (default: ~/.claude/skills)\n"
+  printf "    ${GREEN}ANTIGRAVITY_SKILLS_DIR${RESET}   Antigravity skills directory (default: ~/.gemini/antigravity-cli/skills)\n"
+  printf "    ${DIM}                         Falls back to GEMINI_SKILLS_DIR if set (legacy support)${RESET}\n"
   printf "\n"
   printf "${BOLD}  REPOSITORY${RESET}\n"
   printf "    ${DIM}%s${RESET}\n" "$REPO_URL"
@@ -178,6 +183,61 @@ discover_skills() {
   ok "Found ${#SKILLS[@]} skill(s): ${DIM}${SKILLS[*]}${RESET}"
 }
 
+# ── Fetch & Query Skill Descriptions ─────────────────────────────────────────
+fetch_descriptions() {
+  # Prefer a local descriptions.json when running from a clone
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd)" || script_dir=""
+  if [[ -n "$script_dir" && -f "${script_dir}/descriptions.json" ]]; then
+    DESCRIPTIONS_JSON=$(<"${script_dir}/descriptions.json")
+    return
+  fi
+
+  local url="${BASE_URL}/descriptions.json"
+  DESCRIPTIONS_JSON=$(curl -sf --max-time 10 "$url" 2>/dev/null) || DESCRIPTIONS_JSON=""
+}
+
+get_description() {
+  local skill_name="$1"
+  if [[ -z "$DESCRIPTIONS_JSON" ]]; then return; fi
+
+  if command -v jq &>/dev/null; then
+    printf '%s' "$DESCRIPTIONS_JSON" | jq -r --arg n "$skill_name" '.[$n] // empty'
+    return
+  fi
+
+  if command -v python3 &>/dev/null; then
+    printf '%s' "$DESCRIPTIONS_JSON" | python3 -c \
+      "import sys,json; d=json.load(sys.stdin); print(d.get('${skill_name}',''))"
+    return
+  fi
+
+  # awk fallback: relies on pretty-printed JSON with one key per line
+  printf '%s' "$DESCRIPTIONS_JSON" | awk -F'"' -v key="$skill_name" '$2 == key { print $4 }'
+}
+
+# ── List Available Skills ─────────────────────────────────────────────────────
+list_skills() {
+  check_deps
+  discover_skills
+  fetch_descriptions
+  printf "\n"
+  sep
+  printf "  ${BOLD}Available skills${RESET}\n"
+  sep
+  printf "\n"
+  for skill in "${SKILLS[@]}"; do
+    local desc
+    desc=$(get_description "$skill")
+    if [[ -n "$desc" ]]; then
+      printf "  ${GREEN}•${RESET}  ${BOLD}%s${RESET}\n     ${DIM}%s${RESET}\n\n" "$skill" "$desc"
+    else
+      printf "  ${GREEN}•${RESET}  %s\n" "$skill"
+    fi
+  done
+  printf "\n"
+}
+
 # ── Fetch a Single Skill's SKILL.md ──────────────────────────────────────────
 fetch_skill() {
   local skill_name="$1"
@@ -206,22 +266,22 @@ install_to_claude() {
   ok "[Claude] ${BOLD}${skill_name}${RESET} → ${DIM}${dest}${RESET}"
 }
 
-# ── Install to Gemini CLI ─────────────────────────────────────────────────────
-install_to_gemini() {
+# ── Install to Antigravity CLI ────────────────────────────────────────────────
+install_to_antigravity() {
   local skill_name="$1"
-  local dest="${GEMINI_SKILLS_DIR}/${skill_name}/SKILL.md"
+  local dest="${ANTIGRAVITY_SKILLS_DIR}/${skill_name}/SKILL.md"
 
-  info "[Gemini] Downloading ${BOLD}${skill_name}${RESET}..."
+  info "[Antigravity] Downloading ${BOLD}${skill_name}${RESET}..."
 
   local content
   if ! content=$(fetch_skill "$skill_name"); then
-    warn "[Gemini] Skipping '${skill_name}' — download failed."
+    warn "[Antigravity] Skipping '${skill_name}' — download failed."
     return 1
   fi
 
-  mkdir -p "${GEMINI_SKILLS_DIR}/${skill_name}"
+  mkdir -p "${ANTIGRAVITY_SKILLS_DIR}/${skill_name}"
   printf '%s\n' "$content" > "$dest"
-  ok "[Gemini] ${BOLD}${skill_name}${RESET} → ${DIM}${dest}${RESET}"
+  ok "[Antigravity] ${BOLD}${skill_name}${RESET} → ${DIM}${dest}${RESET}"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -233,20 +293,23 @@ main() {
   # ── Parse Arguments ────────────────────────────────────────────────────────
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      -h|--help)   show_help; exit 0 ;;
-      -c|--claude) INSTALL_CLAUDE=true ;;
-      -g|--gemini) INSTALL_GEMINI=true ;;
-      -a|--all)    INSTALL_ALL=true ;;
+      -h|--help)            show_help; exit 0 ;;
+      -l|--list)            LIST_SKILLS=true ;;
+      -c|--claude)          INSTALL_CLAUDE=true ;;
+      -g|--antigravity|--gemini) INSTALL_ANTIGRAVITY=true ;;
+      -a|--all)             INSTALL_ALL=true ;;
       -*)          die "Unknown option: '${1}'. Run with -h for help." ;;
       *)           positional+=("$1") ;;
     esac
     shift
   done
 
+  if $LIST_SKILLS; then list_skills; exit 0; fi
+
   # Default: install for both tools when neither is specified
-  if ! $INSTALL_CLAUDE && ! $INSTALL_GEMINI; then
+  if ! $INSTALL_CLAUDE && ! $INSTALL_ANTIGRAVITY; then
     INSTALL_CLAUDE=true
-    INSTALL_GEMINI=true
+    INSTALL_ANTIGRAVITY=true
   fi
 
   check_deps
@@ -269,12 +332,12 @@ main() {
 
   # ── Target Label for Display ──────────────────────────────────────────────
   local target_label
-  if $INSTALL_CLAUDE && $INSTALL_GEMINI; then
-    target_label="Claude Code + Gemini CLI"
+  if $INSTALL_CLAUDE && $INSTALL_ANTIGRAVITY; then
+    target_label="Claude Code + Antigravity CLI"
   elif $INSTALL_CLAUDE; then
     target_label="Claude Code"
   else
-    target_label="Gemini CLI"
+    target_label="Antigravity CLI"
   fi
 
   # ── Header ────────────────────────────────────────────────────────────────
@@ -291,8 +354,8 @@ main() {
     if $INSTALL_CLAUDE; then
       install_to_claude "$skill" || errors=$((errors + 1))
     fi
-    if $INSTALL_GEMINI; then
-      install_to_gemini "$skill" || errors=$((errors + 1))
+    if $INSTALL_ANTIGRAVITY; then
+      install_to_antigravity "$skill" || errors=$((errors + 1))
     fi
     printf "\n"
   done
