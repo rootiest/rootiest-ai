@@ -5,7 +5,7 @@ Instructions:
 Execute the following two phases sequentially. Do not proceed to Phase 2 unless Phase 1 completes successfully.
 
 1. Phase 1: Documentation Sync & Code Audit
-   - Act as the `/readme-sync-audit` skill.
+   - Act as the `/docs-sync-audit` skill.
    - Scan all file changes since the last README edit and update the README to ensure it accurately reflects the current state of the codebase.
    - Audit all code files for any syntax errors, regressions, or issues.
    - CRITICAL: If any code errors or breaking issues are discovered during the audit, HALT the workflow immediately and report them to the user. Do not proceed to publishing.
