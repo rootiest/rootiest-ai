@@ -1,5 +1,6 @@
 {
   "date-time": "Get the current date and time when it is relevant to the task at hand, and use it to make informed decisions.",
+  "docs-sync-audit": "Keep documentation accurate by programmatically aligning it with the current state of the codebase.",
   "git-publish-workflow": "Automate the full lifecycle from uncommitted local work to an open Pull Request, with built-in quality gates.",
   "readme-sync-audit": "Keep README.md accurate by programmatically aligning it with the current state of the codebase.",
   "ship-it": "Run a comprehensive pre-flight audit and publish changes to a new PR in a single command.",
