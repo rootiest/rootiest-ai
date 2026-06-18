@@ -3,6 +3,7 @@ name: readme-sync-audit
 description: Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.
 version: 1.2.0
 user-invocable: true
+author: Rootiest
 ---
 
 # README Synchronization & Audit Skill

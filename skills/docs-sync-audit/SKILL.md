@@ -3,6 +3,7 @@ name: docs-sync-audit
 description: Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.
 version: 1.3.0
 user-invocable: true
+author: Rootiest
 ---
 
 # Documentation Synchronization & Audit Skill

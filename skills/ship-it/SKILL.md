@@ -3,6 +3,7 @@ name: ship-it
 description: Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.
 version: 1.0.0
 user-invocable: true
+author: Rootiest
 ---
 
 # /ship-it

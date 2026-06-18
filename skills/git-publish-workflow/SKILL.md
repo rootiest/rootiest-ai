@@ -3,6 +3,7 @@ name: git-publish-workflow
 description: Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work.
 version: 1.1.0
 user-invocable: true
+author: Rootiest
 ---
 
 # Git Publish & PR Workflow

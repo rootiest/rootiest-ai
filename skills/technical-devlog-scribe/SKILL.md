@@ -3,6 +3,7 @@ name: technical-devlog-scribe
 description: Generates a highly structured, objective technical summary of a development session.
 version: 1.0.0
 user-invocable: true
+author: Rootiest
 ---
 
 # SKILL: Technical Devlog Scribe

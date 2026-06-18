@@ -3,6 +3,7 @@ name: date-time
 description: Retrieves the exact current date and time for time-sensitive queries, scheduling, duration calculations, and validating chronological context.
 version: 1.0.0
 user-invocable: true
+author: Rootiest
 ---
 
 # Current Date and Time Retrieval

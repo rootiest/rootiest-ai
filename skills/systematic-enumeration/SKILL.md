@@ -3,6 +3,7 @@ name: systematic-enumeration
 description: Forces element-by-element verification for finite sets to prevent counting errors.
 version: 1.0.0
 user-invocable: true
+author: Rootiest
 ---
 
 # Systematic Enumeration & Verification Skill
