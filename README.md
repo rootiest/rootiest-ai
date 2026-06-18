@@ -12,6 +12,9 @@ Skills are plain Markdown files. The included `install.sh` script handles discov
   - [systematic-enumeration](#systematic-enumeration)
   - [git-publish-workflow](#git-publish-workflow)
   - [readme-sync-audit](#readme-sync-audit)
+  - [docs-sync-audit](#docs-sync-audit)
+  - [date-time](#date-time)
+  - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
 - [Installation](#installation)
   - [Quick Install (curl)](#quick-install-curl)
@@ -67,13 +70,49 @@ Three-phase execution:
 
 ---
 
+### `docs-sync-audit`
+
+**Purpose:** Keep documentation accurate by aligning the project's Single Source of Truth (SSoT) with the current state of the codebase.
+
+Unlike `readme-sync-audit`, this skill first discovers the documentation root. If a dedicated `docs/`, `wiki/`, or site config (e.g. `mkdocs.yml`) exists, it is treated as the SSoT and receives the detailed updates; the `README.md` is then kept as a high-level landing page that links into it. If no docs directory exists, it falls back to `README.md` as the SSoT.
+
+Three-phase execution:
+
+1. **Delta Analysis** — locate the last commit that touched the SSoT, diff all code changes to `HEAD`, and extract undocumented environment variables, CLI flags, or API changes.
+2. **Pruning & Update Audit** — route detailed changes to the correct files, remove stale steps, correct versions and paths, and synthesize docs for new features.
+3. **Structural Integrity Check** — verify Quick Start commands, configuration keys, and usage examples still match the implementation.
+
+**Use when:** you say "Update the docs," "Sync the wiki," or invoke `/docs-sync-audit`.
+
+---
+
+### `date-time`
+
+**Purpose:** Retrieve the exact, real-time current date and time when a task depends on the present moment.
+
+The skill runs the system `date` command rather than guessing, then uses the result for time-sensitive reasoning.
+
+**Use when:** the request asks for the current date/time, uses relative expressions ("today", "next week", "recently"), or needs an age, duration, countdown, or check of whether an event has already occurred.
+
+---
+
+### `technical-devlog-scribe`
+
+**Purpose:** Produce a dense, objective technical summary of a development session as a durable historical record optimized for future context loading.
+
+The skill writes a structured Markdown file to `AGENTS/devlogs/<kebab-case-short-description>.md`, with YAML frontmatter (date, title, tags, status) followed by the session summary. It relies strictly on what happened in the session — no hallucinated external constraints — and avoids conversational filler.
+
+**Use when:** you say "session wrap-up," "write a devlog," "done for the day," or want an auditable record of what changed and why.
+
+---
+
 ### `ship-it`
 
 **Purpose:** Run a comprehensive pre-flight audit and publish changes to a new PR in a single command.
 
 Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 
-1. **Documentation Sync & Code Audit** — acts as `/readme-sync-audit`: scans all file changes since the last README edit, updates the README to match the current codebase, and audits code files for syntax errors or regressions. **Halts the entire workflow** if any breaking issue is found.
+1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all file changes since the last documentation edit, updates the docs/README to match the current codebase, and audits code files for syntax errors or regressions. **Halts the entire workflow** if any breaking issue is found.
 2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a descriptively named branch, commits all pending changes (including the README updates from Phase 1), pushes to the remote, and opens a Pull Request against `main`.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
