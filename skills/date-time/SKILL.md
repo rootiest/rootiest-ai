@@ -1,4 +1,11 @@
-# Skill Name: Current Date and Time Retrieval
+---
+name: date-time
+description: Retrieves the exact current date and time for time-sensitive queries, scheduling, duration calculations, and validating chronological context.
+version: 1.0.0
+user-invocable: true
+---
+
+# Current Date and Time Retrieval
 
 ## Purpose
 Enables the assistant to retrieve the exact, real-time current date and time when addressing time-sensitive queries, scheduling tasks, calculating durations, or validating chronological context.

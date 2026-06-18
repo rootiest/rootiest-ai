@@ -1,9 +1,8 @@
 ---
-name: Systematic Enumeration
+name: systematic-enumeration
 description: Forces element-by-element verification for finite sets to prevent counting errors.
-version: 1.0
+version: 1.0.0
 user-invocable: true
-disable-model-invocation: false
 ---
 
 # Systematic Enumeration & Verification Skill

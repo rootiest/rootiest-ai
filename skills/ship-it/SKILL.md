@@ -1,5 +1,11 @@
-Name: /ship-it
-Description: Run a comprehensive pre-flight audit, sync the README, and publish the changes to a new PR.
+---
+name: ship-it
+description: Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.
+version: 1.0.0
+user-invocable: true
+---
+
+# /ship-it
 
 Instructions:
 Execute the following two phases sequentially. Do not proceed to Phase 2 unless Phase 1 completes successfully.
