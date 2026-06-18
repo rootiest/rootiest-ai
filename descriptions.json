@@ -4,5 +4,6 @@
   "git-publish-workflow": "Automate the full lifecycle from uncommitted local work to an open Pull Request, with built-in quality gates.",
   "readme-sync-audit": "Keep README.md accurate by programmatically aligning it with the current state of the codebase.",
   "ship-it": "Run a comprehensive pre-flight audit and publish changes to a new PR in a single command.",
-  "systematic-enumeration": "Eliminate counting and membership errors via explicit set enumeration and atomic element testing."
+  "systematic-enumeration": "Eliminate counting and membership errors via explicit set enumeration and atomic element testing.",
+  "technical-devlog-scribe": "Generates a highly structured, objective technical summary of a development session."
 }
