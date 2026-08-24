@@ -82,6 +82,10 @@ Thumbs.db
 [Cc][Ll][Aa][Uu][Dd][Ee].[Mm][Dd]
 .[Cc][Ll][Aa][Uu][Dd]*
 
+# Claude Code plugin marketplace manifest (generated, must stay tracked)
+!.claude-plugin/
+!.claude-plugin/**
+
 # Matches GEMINI.md, .gemin*, etc.
 [Gg][Ee][Mm][Ii][Nn][Ii].[Mm][Dd]
 .[Gg][Ee][Mm][Ii][Nn]*

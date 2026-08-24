@@ -1,0 +1,48 @@
+name: Generate plugin manifests
+
+on:
+  pull_request:
+    paths:
+      - "skills/**"
+      - "manifest.yaml"
+      - "scripts/**"
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - "manifest.yaml"
+      - "scripts/**"
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install -r scripts/requirements.txt
+      - run: python3 scripts/generate_plugins.py --check
+
+  generate:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install -r scripts/requirements.txt
+      - run: python3 scripts/generate_plugins.py
+      - name: Commit generated output
+        run: |
+          git config user.name "gitea-actions"
+          git config user.email "actions@git.rootiest.dev"
+          git add .claude-plugin descriptions.json dist
+          if git diff --cached --quiet; then
+            echo "No generated output changes."
+            exit 0
+          fi
+          git commit -m "chore(plugins): regenerate plugin manifests"
+          git push origin HEAD:main

@@ -17,11 +17,13 @@ Skills are plain Markdown files. The included `install.sh` script handles discov
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
 - [Installation](#installation)
+  - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
   - [Quick Install (curl)](#quick-install-curl)
   - [Flags & Options](#flags--options)
   - [Environment Variables](#environment-variables)
   - [Examples](#examples)
   - [Manual Install](#manual-install)
+- [Repository Structure](#repository-structure)
 - [License](#license)
 
 ---
@@ -120,6 +122,26 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 ---
 
 ## Installation
+
+### Claude Code Plugin Marketplace
+
+This repository is a Claude Code plugin marketplace. Each skill is installable
+individually, or install everything as one bundle. This is the preferred
+install path for Claude Code — `install.sh` remains available as a
+cross-tool fallback (and is the only supported path for Antigravity CLI today).
+
+```
+/plugin marketplace add https://git.rootiest.dev/rootiest/ai-skills.git
+/plugin install git-publish-workflow@rootiest-skills
+```
+
+Install every skill at once with the `rootiest-skills-all` bundle:
+
+```
+/plugin install rootiest-skills-all@rootiest-skills
+```
+
+Run `/plugin marketplace update` to pick up newly published skills.
 
 ### Quick Install (curl)
 
@@ -247,6 +269,29 @@ bash install.sh --all
 ```
 
 ---
+
+## Repository Structure
+
+Skill content lives entirely in `skills/<name>/SKILL.md` — that's the single
+source of truth for a skill's metadata (YAML frontmatter: `name`,
+`description`, `version`, `author`, `user-invocable`) and instructions.
+`manifest.yaml` holds only marketplace-level metadata (owner, marketplace
+name, which agent targets to generate for) — it does not list skills
+individually; adding a new `skills/<name>/` folder is picked up automatically.
+
+CI (`.gitea/workflows/plugins.yml`) runs `scripts/generate_plugins.py` on
+every push to `main` that touches `skills/`, `manifest.yaml`, or the
+generator itself, and commits the regenerated output:
+
+| Path | Generated for |
+|---|---|
+| `.claude-plugin/marketplace.json` | Claude Code plugin marketplace |
+| `dist/agy/**` | Antigravity CLI (`agy`) plugins |
+| `descriptions.json` | `install.sh` skill listing |
+
+Don't hand-edit any of the paths above — edit the source skill or
+`manifest.yaml` and let CI regenerate them. Pull requests run the same
+generator in `--check` mode to catch missing/invalid frontmatter before merge.
 
 ## License
 
