@@ -8,7 +8,7 @@ set -euo pipefail
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 readonly BASE_URL="https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main"
-readonly REPO_URL="https://git.rootiest.dev/rootiest/rootiest-ai.git"
+readonly REPO_URL="https://url.rootiest.dev/ai"
 readonly API_URL="https://git.rootiest.dev/api/v1/repos/rootiest/rootiest-ai/contents/skills"
 
 # Overridable via environment
