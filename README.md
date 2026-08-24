@@ -1,14 +1,16 @@
 # Rootiest AI Repository
 
-A collection of reusable AI skills (structured prompt protocols) for **Claude Code** and **Antigravity CLI**. Each skill defines a precise execution protocol that guides the AI through complex, multi-step tasks — replacing ad-hoc prompting with consistent, auditable workflows.
-
-Skills are plain Markdown files. The included `install.sh` script handles discovery and installation in a single command.
+A shareable extension library for **Claude Code** and **Antigravity CLI**
+(`agy`). The unit of distribution is a **plugin** — a bundle that can carry
+any mix of skills (structured prompt protocols), MCP servers, lifecycle
+hooks, and tool-specific extras (slash commands, subagents, rules) — built
+from one source tree and published as a native marketplace for both tools.
 
 ---
 
 ## Table of Contents
 
-- [Skills](#skills)
+- [Plugins](#plugins)
   - [systematic-enumeration](#systematic-enumeration)
   - [git-publish-workflow](#git-publish-workflow)
   - [readme-sync-audit](#readme-sync-audit)
@@ -16,19 +18,19 @@ Skills are plain Markdown files. The included `install.sh` script handles discov
   - [date-time](#date-time)
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
+  - [core-essentials](#core-essentials)
 - [Installation](#installation)
-  - [Claude Code Plugin Marketplace](#claude-code-plugin-marketplace)
-  - [Quick Install (curl)](#quick-install-curl)
-  - [Flags & Options](#flags--options)
-  - [Environment Variables](#environment-variables)
-  - [Examples](#examples)
-  - [Manual Install](#manual-install)
+  - [Claude Code](#claude-code)
+  - [Antigravity CLI (agy)](#antigravity-cli-agy)
 - [Repository Structure](#repository-structure)
+  - [Anatomy of a Plugin](#anatomy-of-a-plugin)
+  - [How Generation Works](#how-generation-works)
+- [Private Overlay Builds](#private-overlay-builds)
 - [License](#license)
 
 ---
 
-## Skills
+## Plugins
 
 ### `systematic-enumeration`
 
@@ -121,177 +123,154 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 
 ---
 
+### `core-essentials`
+
+**Purpose:** Cross-tool utilities that don't belong to a single workflow.
+
+Currently bundles `delegate-agy`, which hands a subtask off to the
+Antigravity CLI (`agy`) in headless mode — useful for a second opinion,
+external grounded research, or a large multi-file audit (>500 lines) that
+would otherwise bloat the current context.
+
+---
+
 ## Installation
 
-### Claude Code Plugin Marketplace
+This repository is a native plugin marketplace for both tools — there is no
+install script. Each plugin can be installed individually, or as one bundle
+(`rootiest-ai-all`).
 
-This repository is a Claude Code plugin marketplace. Each skill is installable
-individually, or install everything as one bundle. This is the preferred
-install path for Claude Code — `install.sh` remains available as a
-cross-tool fallback (and is the only supported path for Antigravity CLI today).
+### Claude Code
 
 ```
 /plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git
 /plugin install git-publish-workflow@rootiest-ai
 ```
 
-Install every skill at once with the `rootiest-ai-all` bundle:
+Install everything at once:
 
 ```
 /plugin install rootiest-ai-all@rootiest-ai
 ```
 
-Run `/plugin marketplace update` to pick up newly published skills.
+Run `/plugin marketplace update` to pick up newly published plugins.
 
-### Quick Install (curl)
+### Antigravity CLI (`agy`)
 
-The intended usage is a single `curl | bash` command. The installer fetches and runs `install.sh` directly — no clone required.
-
-> [!TIP]
-> The short-url `https://url.rootiest.dev/ai-install` can be substituted for the full URL in the examples below.  
-> e.g. `curl -sL https://url.rootiest.dev/ai-install | bash -s -- --all`
-
-**Install all skills for both Claude Code and Antigravity CLI:**
+`agy` discovers plugins from a `plugins/` folder pointed at by an entry in
+`plugins.json` — either globally (`~/.gemini/config/plugins.json`) or per
+project (`.agents/plugins.json`). Clone this repo, then add an entry
+pointing at the generated `dist/agy` directory:
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all
+git clone https://git.rootiest.dev/rootiest/rootiest-ai.git ~/rootiest-ai
 ```
 
-**Install all skills for Claude Code only:**
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all --claude
+```json
+// ~/.gemini/config/plugins.json
+{
+  "entries": [
+    { "path": "~/rootiest-ai/dist/agy" }
+  ]
+}
 ```
 
-**Install all skills for Antigravity CLI only:**
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all --antigravity
-```
-
-**Install a single skill for both tools:**
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- systematic-enumeration
-```
-
-**Install specific skills for Claude Code only:**
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow readme-sync-audit
-```
-
-**Install specific skills for Antigravity CLI only:**
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration git-publish-workflow
-```
-
-> **Note:** Providing explicit skill names alongside `--all` causes the named skills to take precedence — only those skills are installed.
-
----
-
-### Flags & Options
-
-| Flag | Description |
-|---|---|
-| `-c`, `--claude` | Install into Claude Code (`~/.claude/skills/`) |
-| `-g`, `--antigravity` | Install into Antigravity CLI (`~/.gemini/antigravity-cli/skills/`) |
-| `-a`, `--all` | Install every skill available in the repository |
-| `SKILL...` | Install one or more named skills (positional arguments) |
-| `-l`, `--list` | List all available skills with descriptions and exit |
-| `-h`, `--help` | Show the help page |
-
-**Tool targeting:** if neither `--claude` nor `--antigravity` is specified, the installer targets **both** tools by default.
-
-**Skill selection precedence:** explicit skill names always override `--all`. Passing `--all skill-name` installs only `skill-name`, not every skill.
-
-**Dependencies:** `curl` and `git` must be present on `PATH`. The installer checks for both and exits with a clear error if either is missing.
-
----
-
-### Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `CLAUDE_SKILLS_DIR` | `~/.claude/skills` | Override the Claude Code install directory |
-| `ANTIGRAVITY_SKILLS_DIR` | `~/.gemini/antigravity-cli/skills` | Override the Antigravity CLI install directory. Falls back to `GEMINI_SKILLS_DIR` if set (legacy support). |
-
-Example — installing to a project-local skills directory:
-
-```bash
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh \
-  | CLAUDE_SKILLS_DIR=./.claude/skills bash -s -- --claude systematic-enumeration
-```
-
----
-
-### Examples
-
-```bash
-# Install everything, both tools (simplest possible invocation)
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all
-
-# Install one skill, Claude only
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow
-
-# Install two skills, Antigravity only
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration readme-sync-audit
-
-# Override install directory, Claude only
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh \
-  | CLAUDE_SKILLS_DIR=~/my-skills bash -s -- --claude --all
-```
-
----
-
-### Manual Install
-
-If you prefer to inspect the script before running it:
-
-```bash
-# Download
-curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh -o install.sh
-
-# Review
-less install.sh
-
-# Run
-bash install.sh --all
-```
-
-Or clone the repository and run locally:
-
-```bash
-git clone https://git.rootiest.dev/rootiest/rootiest-ai.git
-cd rootiest-ai
-bash install.sh --all
-```
+`git pull` in the clone to pick up updates; `agy plugin list` / `agy plugin
+validate <path>` to inspect what's loaded.
 
 ---
 
 ## Repository Structure
 
-Skill content lives entirely in `skills/<name>/SKILL.md` — that's the single
-source of truth for a skill's metadata (YAML frontmatter: `name`,
-`description`, `version`, `author`, `user-invocable`) and instructions.
-`manifest.yaml` holds only marketplace-level metadata (owner, marketplace
-name, which agent targets to generate for) — it does not list skills
-individually; adding a new `skills/<name>/` folder is picked up automatically.
+### Anatomy of a Plugin
 
-CI (`.gitea/workflows/plugins.yml`) runs `scripts/generate_plugins.py` on
-every push to `main` that touches `skills/`, `manifest.yaml`, or the
-generator itself, and commits the regenerated output:
+Every plugin lives under `plugins/<name>/` and is the single source of
+truth for that name — nothing under `plugins/` is ever written by the
+generator. A plugin can bundle any subset of:
+
+```
+plugins/<name>/
+├── plugin.json          # required: name, description, version, author
+├── skills/<skill>/SKILL.md   # 0+ skills (YAML frontmatter: name, description, version, author)
+├── hooks.json            # optional: lifecycle hooks, Claude-shaped event → matcher groups
+├── mcp.json              # optional: {"mcpServers": {...}}
+├── rules/AGENTS.md        # optional: agy-only, always-on project rules
+├── commands/*.md          # optional: Claude Code-only slash commands
+└── agents/*.md            # optional: Claude Code-only subagents
+```
+
+`hooks.json` and `mcp.json` are translated per target rather than copied
+verbatim where the two tools' schemas diverge:
+
+- MCP: the shared `mcpServers` shape passes straight through to Claude's
+  `.mcp.json`; a `url`/`serverUrl` remote entry becomes agy's
+  `serverUrl` field in `mcp_config.json`.
+- Hooks: Claude Code has far more event types than agy documents. Events
+  agy doesn't support (`SessionStart`, `TaskCreated`, etc.) simply stay
+  Claude-only — the agy output only carries `PreToolUse`/`PostToolUse`
+  (kept grouped with their `matcher`) and `PreInvocation`/`PostInvocation`/
+  `Stop` (flattened to agy's handler-list shape, since agy doesn't group
+  those by matcher).
+- `rules/` has no Claude Code plugin equivalent and is skipped for that
+  target; `commands/`/`agents/` have no agy equivalent and are skipped for
+  that target.
+
+### How Generation Works
+
+`scripts/generate_plugins.py` reads `manifest.yaml` (marketplace metadata,
+bundle id, target list) and every `plugins/<name>/`, then regenerates:
 
 | Path | Generated for |
 |---|---|
 | `.claude-plugin/marketplace.json` | Claude Code plugin marketplace |
-| `dist/agy/**` | Antigravity CLI (`agy`) plugins |
-| `descriptions.json` | `install.sh` skill listing |
+| `dist/claude-code/**` | Claude Code plugin directories (linked from the marketplace) |
+| `dist/agy/**` | Antigravity CLI (`agy`) plugin directories |
 
-Don't hand-edit any of the paths above — edit the source skill or
-`manifest.yaml` and let CI regenerate them. Pull requests run the same
-generator in `--check` mode to catch missing/invalid frontmatter before merge.
+CI (`.gitea/workflows/plugins.yml`) runs the generator on every push to
+`main` that touches `plugins/`, `manifest.yaml`, or the generator itself,
+and commits the regenerated output; it can also be re-run on demand from
+the Actions tab (`workflow_dispatch`). Pull requests run the same generator
+in `--check` mode to catch missing/invalid `plugin.json`/`SKILL.md`
+frontmatter before merge.
+
+Don't hand-edit anything under `.claude-plugin/` or `dist/` — edit the
+source plugin or `manifest.yaml` and let the generator regenerate them.
+
+---
+
+## Private Overlay Builds
+
+The generator supports layering an additional, non-public source of
+plugins on top of this repo — for keeping PII, tokens, API keys, or
+personal-only plugins out of a public repo's git history entirely, while
+still reusing the same plugin format and generator.
+
+```bash
+# Layer a second, already-cloned repo on top of this one
+python3 scripts/generate_plugins.py --source . --source ~/rootiest-ai-private
+
+# Or have the generator clone it (token read from an env var, never a CLI argument)
+export PRIVATE_TOKEN=...
+python3 scripts/generate_plugins.py \
+  --private-repo https://git.example.com/you/rootiest-ai-private.git \
+  --private-ref main \
+  --private-token-env PRIVATE_TOKEN
+```
+
+A later `--source` overlays the earlier ones per plugin: a plugin name that
+only exists in the private source is added; a plugin name that exists in
+both is merged file-by-file, with the private copy winning on conflicts
+(e.g. supplying a real `mcp.json` where the public plugin ships a
+placeholder).
+
+Output never lands in this repo's tracked paths for an overlaid build —
+`--out` defaults to `dist-private/` (gitignored) whenever more than one
+source is in play. Add `--install-local` to also drop the result straight
+into `~/.claude/plugins/marketplaces/<name>-private/` and print the
+`~/.gemini/config/plugins.json` entry for agy, so a personal build is
+usable immediately without committing anything anywhere.
+
+---
 
 ## License
 

@@ -1,4 +1,3 @@
 {
-  "name": "systematic-enumeration",
-  "description": "Forces element-by-element verification for finite sets to prevent counting errors."
+  "name": "systematic-enumeration"
 }

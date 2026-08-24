@@ -1,4 +1,3 @@
 {
-  "name": "ship-it",
-  "description": "Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR."
+  "name": "ship-it"
 }

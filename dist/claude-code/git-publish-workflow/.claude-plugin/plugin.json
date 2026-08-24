@@ -1,0 +1,6 @@
+{
+  "name": "git-publish-workflow",
+  "description": "Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.",
+  "version": "1.2.0",
+  "author": "Rootiest"
+}
