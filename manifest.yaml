@@ -1,14 +1,14 @@
 schemaVersion: 1
 
 marketplace:
-  name: rootiest-skills
+  name: rootiest-ai
   owner:
     name: Rootiest
     url: https://git.rootiest.dev/rootiest/rootiest-ai
   description: Reusable AI skills for Claude Code and Antigravity CLI
 
 bundle:
-  id: rootiest-skills-all
+  id: rootiest-ai-all
   license: GPL-3.0-or-later
 
 targets:

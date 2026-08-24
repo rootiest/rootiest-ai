@@ -1,4 +1,4 @@
-# Rootiest Skills Repository
+# Rootiest AI Repository
 
 A collection of reusable AI skills (structured prompt protocols) for **Claude Code** and **Antigravity CLI**. Each skill defines a precise execution protocol that guides the AI through complex, multi-step tasks — replacing ad-hoc prompting with consistent, auditable workflows.
 
@@ -132,13 +132,13 @@ cross-tool fallback (and is the only supported path for Antigravity CLI today).
 
 ```
 /plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git
-/plugin install git-publish-workflow@rootiest-skills
+/plugin install git-publish-workflow@rootiest-ai
 ```
 
-Install every skill at once with the `rootiest-skills-all` bundle:
+Install every skill at once with the `rootiest-ai-all` bundle:
 
 ```
-/plugin install rootiest-skills-all@rootiest-skills
+/plugin install rootiest-ai-all@rootiest-ai
 ```
 
 Run `/plugin marketplace update` to pick up newly published skills.
@@ -148,8 +148,8 @@ Run `/plugin marketplace update` to pick up newly published skills.
 The intended usage is a single `curl | bash` command. The installer fetches and runs `install.sh` directly — no clone required.
 
 > [!TIP]
-> The short-url `https://url.rootiest.dev/skills` can be substituted for the full URL in the examples below.  
-> e.g. `curl -sL https://url.rootiest.dev/skills | bash -s -- --all`
+> The short-url `https://url.rootiest.dev/ai-install` can be substituted for the full URL in the examples below.  
+> e.g. `curl -sL https://url.rootiest.dev/ai-install | bash -s -- --all`
 
 **Install all skills for both Claude Code and Antigravity CLI:**
 
