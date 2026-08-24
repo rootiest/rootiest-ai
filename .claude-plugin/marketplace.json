@@ -2,7 +2,7 @@
   "name": "rootiest-skills",
   "owner": {
     "name": "Rootiest",
-    "url": "https://git.rootiest.dev/rootiest/ai-skills"
+    "url": "https://git.rootiest.dev/rootiest/rootiest-ai"
   },
   "description": "Reusable AI skills for Claude Code and Antigravity CLI",
   "plugins": [

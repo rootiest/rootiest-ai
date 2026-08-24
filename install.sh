@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # install.sh — AI Skill Installer
-# Install skills from rootiest/ai-skills into Claude Code and/or Antigravity CLI
+# Install skills from rootiest/rootiest-ai into Claude Code and/or Antigravity CLI
 #
 # Usage: bash <(curl -sL <url>) [OPTIONS] [SKILL...]
 
 set -euo pipefail
 
 # ── Constants ──────────────────────────────────────────────────────────────────
-readonly BASE_URL="https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main"
-readonly REPO_URL="https://git.rootiest.dev/rootiest/ai-skills.git"
-readonly API_URL="https://git.rootiest.dev/api/v1/repos/rootiest/ai-skills/contents/skills"
+readonly BASE_URL="https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main"
+readonly REPO_URL="https://git.rootiest.dev/rootiest/rootiest-ai.git"
+readonly API_URL="https://git.rootiest.dev/api/v1/repos/rootiest/rootiest-ai/contents/skills"
 
 # Overridable via environment
 CLAUDE_SKILLS_DIR="${CLAUDE_SKILLS_DIR:-${HOME}/.claude/skills}"
@@ -58,7 +58,7 @@ sep()     { printf "${BOLD_CYAN}%s${RESET}\n" "───────────
 show_help() {
   printf "\n"
   printf "${BOLD_CYAN}  AI Skill Installer${RESET}\n"
-  printf "${DIM}  Install skills from rootiest/ai-skills into Claude Code and Antigravity CLI${RESET}\n"
+  printf "${DIM}  Install skills from rootiest/rootiest-ai into Claude Code and Antigravity CLI${RESET}\n"
   printf "\n"
   printf "${BOLD}  USAGE${RESET}\n"
   printf "    install.sh [OPTIONS] [SKILL...]\n"

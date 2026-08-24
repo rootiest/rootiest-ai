@@ -131,7 +131,7 @@ install path for Claude Code — `install.sh` remains available as a
 cross-tool fallback (and is the only supported path for Antigravity CLI today).
 
 ```
-/plugin marketplace add https://git.rootiest.dev/rootiest/ai-skills.git
+/plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git
 /plugin install git-publish-workflow@rootiest-skills
 ```
 
@@ -154,37 +154,37 @@ The intended usage is a single `curl | bash` command. The installer fetches and 
 **Install all skills for both Claude Code and Antigravity CLI:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all
 ```
 
 **Install all skills for Claude Code only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all --claude
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all --claude
 ```
 
 **Install all skills for Antigravity CLI only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all --antigravity
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all --antigravity
 ```
 
 **Install a single skill for both tools:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- systematic-enumeration
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- systematic-enumeration
 ```
 
 **Install specific skills for Claude Code only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow readme-sync-audit
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow readme-sync-audit
 ```
 
 **Install specific skills for Antigravity CLI only:**
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration git-publish-workflow
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration git-publish-workflow
 ```
 
 > **Note:** Providing explicit skill names alongside `--all` causes the named skills to take precedence — only those skills are installed.
@@ -220,7 +220,7 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 Example — installing to a project-local skills directory:
 
 ```bash
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh \
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh \
   | CLAUDE_SKILLS_DIR=./.claude/skills bash -s -- --claude systematic-enumeration
 ```
 
@@ -230,16 +230,16 @@ curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh 
 
 ```bash
 # Install everything, both tools (simplest possible invocation)
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --all
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --all
 
 # Install one skill, Claude only
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --claude git-publish-workflow
 
 # Install two skills, Antigravity only
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration readme-sync-audit
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh | bash -s -- --antigravity systematic-enumeration readme-sync-audit
 
 # Override install directory, Claude only
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh \
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh \
   | CLAUDE_SKILLS_DIR=~/my-skills bash -s -- --claude --all
 ```
 
@@ -251,7 +251,7 @@ If you prefer to inspect the script before running it:
 
 ```bash
 # Download
-curl -sL https://git.rootiest.dev/rootiest/ai-skills/raw/branch/main/install.sh -o install.sh
+curl -sL https://git.rootiest.dev/rootiest/rootiest-ai/raw/branch/main/install.sh -o install.sh
 
 # Review
 less install.sh
@@ -263,8 +263,8 @@ bash install.sh --all
 Or clone the repository and run locally:
 
 ```bash
-git clone https://git.rootiest.dev/rootiest/ai-skills.git
-cd ai-skills
+git clone https://git.rootiest.dev/rootiest/rootiest-ai.git
+cd rootiest-ai
 bash install.sh --all
 ```
 
