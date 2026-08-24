@@ -3,15 +3,16 @@ name: Generate plugin manifests
 on:
   pull_request:
     paths:
-      - "skills/**"
+      - "plugins/**"
       - "manifest.yaml"
       - "scripts/**"
   push:
     branches: [main]
     paths:
-      - "skills/**"
+      - "plugins/**"
       - "manifest.yaml"
       - "scripts/**"
+  workflow_dispatch: {}
 
 jobs:
   validate:
@@ -26,7 +27,7 @@ jobs:
       - run: python3 scripts/generate_plugins.py --check
 
   generate:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +40,7 @@ jobs:
         run: |
           git config user.name "gitea-actions"
           git config user.email "actions@git.rootiest.dev"
-          git add .claude-plugin descriptions.json dist
+          git add .claude-plugin dist
           if git diff --cached --quiet; then
             echo "No generated output changes."
             exit 0

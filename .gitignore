@@ -116,3 +116,12 @@ AGENTS/
 docs/plans
 docs/devlogs
 #   ────────────────────────────────────────────────────────
+
+#   ─────────────────── Private Overlay Builds ─────────────────
+# Output of `generate_plugins.py` when layering a private/PII-bearing
+# source on top of the public plugins/ tree. Never commit this.
+dist-private/
+
+#   ─────────────────────────── Python ──────────────────────────
+__pycache__/
+*.pyc

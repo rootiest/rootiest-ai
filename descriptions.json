@@ -1,9 +1,0 @@
-{
-  "date-time": "Retrieves the exact current date and time for time-sensitive queries, scheduling, duration calculations, and validating chronological context.",
-  "docs-sync-audit": "Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.",
-  "git-publish-workflow": "Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.",
-  "readme-sync-audit": "Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.",
-  "ship-it": "Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.",
-  "systematic-enumeration": "Forces element-by-element verification for finite sets to prevent counting errors.",
-  "technical-devlog-scribe": "Generates a highly structured, objective technical summary of a development session."
-}

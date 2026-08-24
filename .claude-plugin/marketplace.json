@@ -7,68 +7,40 @@
   "description": "Reusable AI skills for Claude Code and Antigravity CLI",
   "plugins": [
     {
+      "name": "core-essentials",
+      "source": "./dist/claude-code/core-essentials"
+    },
+    {
       "name": "date-time",
-      "description": "Retrieves the exact current date and time for time-sensitive queries, scheduling, duration calculations, and validating chronological context.",
-      "source": "./",
-      "skills": [
-        "./skills/date-time"
-      ]
+      "source": "./dist/claude-code/date-time"
     },
     {
       "name": "docs-sync-audit",
-      "description": "Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.",
-      "source": "./",
-      "skills": [
-        "./skills/docs-sync-audit"
-      ]
+      "source": "./dist/claude-code/docs-sync-audit"
     },
     {
       "name": "git-publish-workflow",
-      "description": "Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.",
-      "source": "./",
-      "skills": [
-        "./skills/git-publish-workflow"
-      ]
+      "source": "./dist/claude-code/git-publish-workflow"
     },
     {
       "name": "readme-sync-audit",
-      "description": "Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.",
-      "source": "./",
-      "skills": [
-        "./skills/readme-sync-audit"
-      ]
+      "source": "./dist/claude-code/readme-sync-audit"
     },
     {
       "name": "ship-it",
-      "description": "Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.",
-      "source": "./",
-      "skills": [
-        "./skills/ship-it"
-      ]
+      "source": "./dist/claude-code/ship-it"
     },
     {
       "name": "systematic-enumeration",
-      "description": "Forces element-by-element verification for finite sets to prevent counting errors.",
-      "source": "./",
-      "skills": [
-        "./skills/systematic-enumeration"
-      ]
+      "source": "./dist/claude-code/systematic-enumeration"
     },
     {
       "name": "technical-devlog-scribe",
-      "description": "Generates a highly structured, objective technical summary of a development session.",
-      "source": "./",
-      "skills": [
-        "./skills/technical-devlog-scribe"
-      ]
+      "source": "./dist/claude-code/technical-devlog-scribe"
     },
     {
       "name": "rootiest-ai-all",
-      "description": "Reusable AI skills for Claude Code and Antigravity CLI (all skills)",
-      "source": "./",
-      "skills": [
-        "./skills/"
-      ]
+      "source": "./dist/claude-code/rootiest-ai-all"
     }
   ]
 }
