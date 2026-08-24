@@ -131,7 +131,7 @@ install path for Claude Code — `install.sh` remains available as a
 cross-tool fallback (and is the only supported path for Antigravity CLI today).
 
 ```
-/plugin marketplace add https://url.rootiest.dev/ai
+/plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git
 /plugin install git-publish-workflow@rootiest-ai
 ```
 
@@ -263,7 +263,7 @@ bash install.sh --all
 Or clone the repository and run locally:
 
 ```bash
-git clone https://url.rootiest.dev/ai
+git clone https://git.rootiest.dev/rootiest/rootiest-ai.git
 cd rootiest-ai
 bash install.sh --all
 ```
