@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "gitea": {
+      "type": "stdio",
+      "command": "go",
+      "args": ["run", "gitea.com/gitea/gitea-mcp@latest", "-t", "stdio"],
+      "env": {
+        "GITEA_HOST": "${GITEA_HOST}",
+        "GITEA_ACCESS_TOKEN": "${GITEA_ACCESS_TOKEN}"
+      }
+    },
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

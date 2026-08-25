@@ -157,26 +157,29 @@ Run `/plugin marketplace update` to pick up newly published plugins.
 
 ### Antigravity CLI (`agy`)
 
-`agy` discovers plugins from a `plugins/` folder pointed at by an entry in
-`plugins.json` — either globally (`~/.gemini/config/plugins.json`) or per
-project (`.agents/plugins.json`). Clone this repo, then add an entry
-pointing at the generated `dist/agy` directory:
+agy documents a `plugins.json` "entries" mechanism for pointing it at an
+external directory of plugins, but empirically it doesn't reliably load
+one as a bundle — hooks and MCP servers inside a `plugins/<name>/` folder
+are never picked up that way, only a stray skill occasionally surfaces via
+agy's generic skill-walk. What does reliably work is placing things
+directly where agy actually looks: `~/.gemini/config/skills/<name>/`,
+`~/.gemini/config/mcp_config.json`, `~/.gemini/config/hooks.json`.
+`scripts/install_agy.py` does exactly that from a generated `dist/agy`:
 
 ```bash
 git clone https://git.rootiest.dev/rootiest/rootiest-ai.git ~/rootiest-ai
+cd ~/rootiest-ai
+python3 scripts/generate_plugins.py          # produces dist/agy/**
+python3 scripts/install_agy.py --all         # symlinks skills, merges MCP/hooks into ~/.gemini/config
 ```
 
-```json
-// ~/.gemini/config/plugins.json
-{
-  "entries": [
-    { "path": "~/rootiest-ai/dist/agy" }
-  ]
-}
-```
-
-`git pull` in the clone to pick up updates; `agy plugin list` / `agy plugin
-validate <path>` to inspect what's loaded.
+It symlinks each skill (so `git pull` + re-running the script — or just
+`git pull` alone, since skills are live symlinks — keeps them current) and
+merges each plugin's `mcpServers`/hooks into the shared global config
+files without touching unrelated entries already there. Install specific
+plugins by name instead of `--all`, add `--project` to target a project's
+`.agents/` instead of the global config, or `--uninstall` to cleanly
+remove exactly what was added.
 
 ---
 
@@ -224,9 +227,9 @@ bundle id, target list) and every `plugins/<name>/`, then regenerates:
 |---|---|
 | `.claude-plugin/marketplace.json` | Claude Code plugin marketplace |
 | `dist/claude-code/**` | Claude Code plugin directories (linked from the marketplace) |
-| `dist/agy/**` | Antigravity CLI (`agy`) plugin directories |
+| `dist/agy/**` | Antigravity CLI (`agy`) plugin directories — an intermediate; run `scripts/install_agy.py` to actually get them into agy |
 
-CI (`.gitea/workflows/plugins.yml`) runs the generator on every push to
+CI (`.github/workflows/plugins.yml`) runs the generator on every push to
 `main` that touches `plugins/`, `manifest.yaml`, or the generator itself,
 and commits the regenerated output; it can also be re-run on demand from
 the Actions tab (`workflow_dispatch`). Pull requests run the same generator
