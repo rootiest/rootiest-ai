@@ -413,8 +413,15 @@ def install_local(manifest: dict, out_dir: Path) -> None:
 
     agy_src = out_dir / "dist" / "agy"
     if agy_src.exists():
-        print("For agy, add this entry to ~/.gemini/config/plugins.json:")
-        print(json.dumps({"entries": [{"path": str(agy_src)}]}, indent=2))
+        install_agy_script = ROOT / "scripts" / "install_agy.py"
+        result = subprocess.run(
+            [sys.executable, str(install_agy_script), "--all", "--dist-dir", str(agy_src)],
+            capture_output=True,
+            text=True,
+        )
+        print(result.stdout, end="")
+        if result.returncode != 0:
+            print(result.stderr, end="", file=sys.stderr)
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
