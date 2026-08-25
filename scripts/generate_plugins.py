@@ -17,6 +17,22 @@ A "plugin" is a directory under `plugins/<name>/` that may bundle any mix of:
   - commands/*.md       (Claude Code-only slash commands)
   - agents/*.md         (Claude Code-only subagents)
 
+Alternatively, a plugin.json may declare `external` instead of carrying any local
+content at all — a target-keyed map of Claude Code marketplace `source` objects
+pointing at a third-party plugin we don't own or vendor, e.g.:
+
+  {
+    "name": "caveman",
+    "external": { "claude-code": { "source": "github", "repo": "owner/repo" } }
+  }
+
+For each listed target, the marketplace entry's `source` is emitted verbatim instead
+of a `./dist/<target>/<name>` path — the plugin's real content is fetched straight
+from upstream at install time, so it's never copied into this repo and never goes
+stale. A plugin with `external` must not also carry local skills/hooks/mcp/rules/
+commands/agents (pick one or the other), and today only the claude-code target
+supports it — agy has no marketplace-style external-source mechanism.
+
 A plugin that ends up with no content at all for a given target (every
 skill excluded, and no hooks/mcp/rules/commands/agents of its own) is
 skipped entirely for that target — it never gets an empty output directory
@@ -143,6 +159,20 @@ def validate_targets(value: "list | None", valid_targets: list[str], context: st
     return value
 
 
+def validate_external(value: "dict | None", valid_targets: list[str], context: str) -> "dict | None":
+    """Validate an optional 'external' map of target -> marketplace source object."""
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not value:
+        raise ValidationError(f"{context}: 'external' must be a non-empty object keyed by target")
+    for target, source in value.items():
+        if target not in valid_targets:
+            raise ValidationError(f"{context}: unknown target '{target}' in 'external' (valid: {', '.join(valid_targets)})")
+        if not isinstance(source, dict) or not source.get("source"):
+            raise ValidationError(f"{context}: external.{target} must be an object with a 'source' field")
+    return value
+
+
 def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
     plugins = []
     for plugin_dir in sorted(merged_root.iterdir()):
@@ -160,6 +190,13 @@ def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
             if not meta.get(field):
                 raise ValidationError(f"{manifest_path}: missing required field '{field}'")
         plugin_targets = validate_targets(meta.get("targets"), valid_targets, str(manifest_path))
+        plugin_external = validate_external(meta.get("external"), valid_targets, str(manifest_path))
+        if plugin_external is not None:
+            for target in plugin_external:
+                if plugin_targets is not None and target not in plugin_targets:
+                    raise ValidationError(
+                        f"{manifest_path}: external.{target} is set but 'targets' does not include '{target}'"
+                    )
 
         skills = []
         skills_dir = plugin_dir / "skills"
@@ -184,17 +221,30 @@ def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
         mcp_path = plugin_dir / "mcp.json"
         mcp = load_json(mcp_path) if mcp_path.exists() else None
 
+        rules_dir = plugin_dir / "rules" if (plugin_dir / "rules").is_dir() else None
+        commands_dir = plugin_dir / "commands" if (plugin_dir / "commands").is_dir() else None
+        agents_dir = plugin_dir / "agents" if (plugin_dir / "agents").is_dir() else None
+
+        if plugin_external is not None and any(
+            (skills, hooks is not None, mcp is not None, rules_dir, commands_dir, agents_dir)
+        ):
+            raise ValidationError(
+                f"{manifest_path}: a plugin with 'external' must not also carry local "
+                "skills/hooks/mcp/rules/commands/agents content"
+            )
+
         plugins.append(
             {
                 "dir": plugin_dir,
                 "meta": meta,
                 "targets": plugin_targets,
+                "external": plugin_external,
                 "skills": skills,
                 "hooks": hooks,
                 "mcp": mcp,
-                "rules_dir": plugin_dir / "rules" if (plugin_dir / "rules").is_dir() else None,
-                "commands_dir": plugin_dir / "commands" if (plugin_dir / "commands").is_dir() else None,
-                "agents_dir": plugin_dir / "agents" if (plugin_dir / "agents").is_dir() else None,
+                "rules_dir": rules_dir,
+                "commands_dir": commands_dir,
+                "agents_dir": agents_dir,
             }
         )
 
@@ -352,6 +402,11 @@ def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
     marketplace_entries = []
     for p in plugins:
         name = p["meta"]["name"]
+        external_source = (p["external"] or {}).get("claude-code") if p["external"] else None
+        if external_source is not None:
+            if plugin_supports(p, "claude-code"):
+                marketplace_entries.append({"name": name, "source": external_source})
+            continue
         if write_claude_plugin(p, plugins_out / name):
             marketplace_entries.append({"name": name, "source": f"./dist/claude-code/{name}"})
 

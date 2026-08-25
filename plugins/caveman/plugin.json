@@ -1,0 +1,13 @@
+{
+  "name": "caveman",
+  "description": "Ultra-compressed communication mode from JuliusBrussee/caveman — cuts output tokens while keeping full technical accuracy. Installed straight from the upstream repo, not vendored here.",
+  "version": "1.0.0",
+  "author": "Rootiest",
+  "targets": ["claude-code"],
+  "external": {
+    "claude-code": {
+      "source": "github",
+      "repo": "JuliusBrussee/caveman"
+    }
+  }
+}

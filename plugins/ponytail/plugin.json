@@ -1,0 +1,13 @@
+{
+  "name": "ponytail",
+  "description": "Lazy senior dev mode from DietrichGebert/ponytail — forces the simplest, shortest solution that actually works (YAGNI, stdlib first, no unrequested abstractions). Installed straight from the upstream repo, not vendored here.",
+  "version": "1.0.0",
+  "author": "Rootiest",
+  "targets": ["claude-code"],
+  "external": {
+    "claude-code": {
+      "source": "github",
+      "repo": "DietrichGebert/ponytail"
+    }
+  }
+}
