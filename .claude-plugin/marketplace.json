@@ -38,6 +38,13 @@
       "source": "./dist/claude-code/github-mcp"
     },
     {
+      "name": "mattpocock-skills",
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills"
+      }
+    },
+    {
       "name": "ponytail",
       "source": {
         "source": "github",
