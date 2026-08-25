@@ -19,11 +19,14 @@ from one source tree and published as a native marketplace for both tools.
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
   - [core-essentials](#core-essentials)
+  - [github-mcp](#github-mcp)
+  - [gitea-mcp](#gitea-mcp)
 - [Installation](#installation)
   - [Claude Code](#claude-code)
   - [Antigravity CLI (agy)](#antigravity-cli-agy)
 - [Repository Structure](#repository-structure)
   - [Anatomy of a Plugin](#anatomy-of-a-plugin)
+  - [Restricting a Plugin (or a Skill) to Specific Targets](#restricting-a-plugin-or-a-skill-to-specific-targets)
   - [How Generation Works](#how-generation-works)
 - [Private Overlay Builds](#private-overlay-builds)
 - [License](#license)
@@ -130,7 +133,28 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 Currently bundles `delegate-agy`, which hands a subtask off to the
 Antigravity CLI (`agy`) in headless mode — useful for a second opinion,
 external grounded research, or a large multi-file audit (>500 lines) that
-would otherwise bloat the current context.
+would otherwise bloat the current context. Only makes sense run *from*
+Claude Code, so its `SKILL.md` declares `targets: [claude-code]` — this
+plugin has no agy output at all.
+
+---
+
+### `github-mcp`
+
+**Purpose:** Connect Claude Code/agy to GitHub via the official
+`@modelcontextprotocol/server-github`, authenticated with a
+`GITHUB_PERSONAL_ACCESS_TOKEN` you set locally — never stored in the repo.
+
+---
+
+### `gitea-mcp`
+
+**Purpose:** Connect Claude Code/agy to a Gitea instance via the official
+`gitea-mcp` server, authenticated with `GITEA_HOST`/`GITEA_ACCESS_TOKEN`
+you set locally.
+
+Split from `github-mcp` into its own plugin so you can install either,
+both, or neither independently.
 
 ---
 
@@ -217,6 +241,26 @@ verbatim where the two tools' schemas diverge:
 - `rules/` has no Claude Code plugin equivalent and is skipped for that
   target; `commands/`/`agents/` have no agy equivalent and are skipped for
   that target.
+
+### Restricting a Plugin (or a Skill) to Specific Targets
+
+Some content only makes sense for one tool — `delegate-agy` (Claude Code
+shelling out to `agy`) has no reason to exist *inside* agy, for instance.
+Declare a `targets` list wherever it's needed:
+
+- In `plugin.json`, `"targets": ["claude-code"]` restricts the **whole
+  plugin** — including any hooks/mcp/rules/commands/agents it bundles —
+  to just the listed targets.
+- In a skill's own `SKILL.md` frontmatter, `targets: [claude-code]`
+  restricts **just that skill**, independent of its sibling skills in the
+  same plugin. A skill's targets are narrowed to, never wider than, its
+  plugin's own targets.
+
+Omitting `targets` (the default everywhere) means "every target in
+`manifest.yaml`" — today's behavior for every existing plugin. A plugin
+left with no content at all for a given target (every skill excluded, and
+nothing of its own) is skipped entirely for that target — no empty output
+directory, no marketplace entry.
 
 ### How Generation Works
 

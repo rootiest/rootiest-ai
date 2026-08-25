@@ -23,6 +23,14 @@
       "source": "./dist/claude-code/git-publish-workflow"
     },
     {
+      "name": "gitea-mcp",
+      "source": "./dist/claude-code/gitea-mcp"
+    },
+    {
+      "name": "github-mcp",
+      "source": "./dist/claude-code/github-mcp"
+    },
+    {
       "name": "readme-sync-audit",
       "source": "./dist/claude-code/readme-sync-audit"
     },
