@@ -2,5 +2,7 @@
   "name": "core-essentials",
   "description": "Core cross-tool utilities, including delegation to the Antigravity CLI (agy) for grounded research and large multi-file audits.",
   "version": "1.0.0",
-  "author": "Rootiest"
+  "author": {
+    "name": "Rootiest"
+  }
 }

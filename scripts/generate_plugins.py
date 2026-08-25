@@ -159,6 +159,17 @@ def validate_targets(value: "list | None", valid_targets: list[str], context: st
     return value
 
 
+def validate_author(value: "dict | str | None", context: str) -> None:
+    """Validate an optional 'author' field. The Claude Code marketplace/plugin
+    schemas both require an object ({"name": ...}), not a bare string."""
+    if value is None:
+        return
+    if not isinstance(value, dict) or not value.get("name"):
+        raise ValidationError(
+            f'{context}: \'author\' must be an object with a \'name\' field, e.g. {{"name": "..."}}'
+        )
+
+
 def validate_external(value: "dict | None", valid_targets: list[str], context: str) -> "dict | None":
     """Validate an optional 'external' map of target -> marketplace source object."""
     if value is None:
@@ -189,6 +200,7 @@ def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
         for field in REQUIRED_PLUGIN_FIELDS:
             if not meta.get(field):
                 raise ValidationError(f"{manifest_path}: missing required field '{field}'")
+        validate_author(meta.get("author"), str(manifest_path))
         plugin_targets = validate_targets(meta.get("targets"), valid_targets, str(manifest_path))
         plugin_external = validate_external(meta.get("external"), valid_targets, str(manifest_path))
         if plugin_external is not None:
@@ -399,16 +411,25 @@ def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
         shutil.rmtree(plugins_out)
     plugins_out.mkdir(parents=True)
 
+    def marketplace_entry(name: str, meta: dict, source) -> dict:
+        entry: dict = {"name": name}
+        if meta.get("description"):
+            entry["description"] = meta["description"]
+        if meta.get("author"):
+            entry["author"] = meta["author"]
+        entry["source"] = source
+        return entry
+
     marketplace_entries = []
     for p in plugins:
         name = p["meta"]["name"]
         external_source = (p["external"] or {}).get("claude-code") if p["external"] else None
         if external_source is not None:
             if plugin_supports(p, "claude-code"):
-                marketplace_entries.append({"name": name, "source": external_source})
+                marketplace_entries.append(marketplace_entry(name, p["meta"], external_source))
             continue
         if write_claude_plugin(p, plugins_out / name):
-            marketplace_entries.append({"name": name, "source": f"./dist/claude-code/{name}"})
+            marketplace_entries.append(marketplace_entry(name, p["meta"], f"./dist/claude-code/{name}"))
 
     bundle_id = manifest["bundle"]["id"]
     bundle_skills = [(p, s) for p in plugins for s in active_skills(p, "claude-code")]
@@ -426,7 +447,13 @@ def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
         bundle_skills_dir = bundle_dest / "skills"
         for _, s in bundle_skills:
             shutil.copytree(s["dir"], bundle_skills_dir / s["frontmatter"]["name"])
-        marketplace_entries.append({"name": bundle_id, "source": f"./dist/claude-code/{bundle_id}"})
+        marketplace_entries.append(
+            marketplace_entry(
+                bundle_id,
+                {"description": f"{manifest['marketplace']['description']} (all skills)"},
+                f"./dist/claude-code/{bundle_id}",
+            )
+        )
 
     marketplace = {
         "name": manifest["marketplace"]["name"],
