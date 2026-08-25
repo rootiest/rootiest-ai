@@ -18,6 +18,7 @@ from one source tree and published as a native marketplace for both tools.
   - [date-time](#date-time)
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
+  - [mirror-it](#mirror-it)
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
@@ -126,6 +127,16 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a descriptively named branch, commits all pending changes (including the README updates from Phase 1), pushes to the remote, and opens a Pull Request against `main`.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
+
+---
+
+### `mirror-it`
+
+**Purpose:** Register a Gitea push mirror so a repository's commits are automatically forwarded to a corresponding GitHub repository.
+
+Uses `tea api` against Gitea's `push_mirrors` endpoint, with credentials passed as `remote_username`/`remote_password` fields — never embedded in the mirror URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are overridable per request, as is the destination repository name. `GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a repo-root `.env` file. All shell snippets are POSIX-compatible so the skill works under bash, zsh, or any shell the agent's tool happens to invoke — not just Fish.
+
+**Use when:** you say "Mirror this repository to GitHub," or invoke `/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't push-mirror to itself.
 
 ---
 

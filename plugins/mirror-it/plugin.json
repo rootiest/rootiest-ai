@@ -1,0 +1,6 @@
+{
+  "name": "mirror-it",
+  "description": "Configures a Gitea repository to automatically push-mirror its contents to GitHub using the tea CLI and jq.",
+  "version": "1.0.0",
+  "author": "Rootiest"
+}

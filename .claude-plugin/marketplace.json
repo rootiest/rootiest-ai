@@ -45,6 +45,10 @@
       }
     },
     {
+      "name": "mirror-it",
+      "source": "./dist/claude-code/mirror-it"
+    },
+    {
       "name": "ponytail",
       "source": {
         "source": "github",
