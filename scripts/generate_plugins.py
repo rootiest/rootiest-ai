@@ -3,13 +3,24 @@
 
 A "plugin" is a directory under `plugins/<name>/` that may bundle any mix of:
 
-  - plugin.json        (required marker + metadata: name, description, version, author)
-  - skills/<name>/SKILL.md   (0+ skills)
+  - plugin.json        (required marker + metadata: name, description, version, author,
+                         optional targets: ["claude-code", "agy", ...] — restricts the
+                         WHOLE plugin, including its hooks/mcp/rules/commands/agents, to
+                         only the listed targets; default is every target in manifest.yaml)
+  - skills/<name>/SKILL.md   (0+ skills; a skill's own frontmatter may also declare
+                         `targets:` to further restrict just that one skill, independent
+                         of its sibling skills — narrowed to, never wider than, the
+                         plugin's own `targets`)
   - hooks.json          (canonical, Claude-shaped: {"<EventName>": [<matcher-group>, ...]})
   - mcp.json            ({"mcpServers": {...}}, shared shape across targets)
   - rules/AGENTS.md     (agy-only; ignored by the Claude Code target)
   - commands/*.md       (Claude Code-only slash commands)
   - agents/*.md         (Claude Code-only subagents)
+
+A plugin that ends up with no content at all for a given target (every
+skill excluded, and no hooks/mcp/rules/commands/agents of its own) is
+skipped entirely for that target — it never gets an empty output directory
+or marketplace entry.
 
 One or more source roots (each containing its own `plugins/` directory) are
 layered together — a later source overlays/overrides an earlier one on a
@@ -120,7 +131,19 @@ def merge_layers(layers: "dict[str, list[Path]]", workdir: Path) -> Path:
     return merged_root
 
 
-def discover_plugins(merged_root: Path) -> list[dict]:
+def validate_targets(value: "list | None", valid_targets: list[str], context: str) -> "list[str] | None":
+    """Validate an optional 'targets' restriction list. None means 'all targets'."""
+    if value is None:
+        return None
+    if not isinstance(value, list) or not value:
+        raise ValidationError(f"{context}: 'targets' must be a non-empty list")
+    for t in value:
+        if t not in valid_targets:
+            raise ValidationError(f"{context}: unknown target '{t}' (valid: {', '.join(valid_targets)})")
+    return value
+
+
+def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
     plugins = []
     for plugin_dir in sorted(merged_root.iterdir()):
         if not plugin_dir.is_dir():
@@ -136,6 +159,7 @@ def discover_plugins(merged_root: Path) -> list[dict]:
         for field in REQUIRED_PLUGIN_FIELDS:
             if not meta.get(field):
                 raise ValidationError(f"{manifest_path}: missing required field '{field}'")
+        plugin_targets = validate_targets(meta.get("targets"), valid_targets, str(manifest_path))
 
         skills = []
         skills_dir = plugin_dir / "skills"
@@ -151,7 +175,8 @@ def discover_plugins(merged_root: Path) -> list[dict]:
                     raise ValidationError(
                         f"{skill_md}: frontmatter name '{fm['name']}' does not match directory name '{skill_dir.name}'"
                     )
-                skills.append({"dir": skill_dir, "frontmatter": fm})
+                skill_targets = validate_targets(fm.get("targets"), valid_targets, str(skill_md))
+                skills.append({"dir": skill_dir, "frontmatter": fm, "targets": skill_targets})
 
         hooks_path = plugin_dir / "hooks.json"
         hooks = load_json(hooks_path) if hooks_path.exists() else None
@@ -163,6 +188,7 @@ def discover_plugins(merged_root: Path) -> list[dict]:
             {
                 "dir": plugin_dir,
                 "meta": meta,
+                "targets": plugin_targets,
                 "skills": skills,
                 "hooks": hooks,
                 "mcp": mcp,
@@ -179,6 +205,22 @@ def discover_plugins(merged_root: Path) -> list[dict]:
             raise ValidationError(f"duplicate plugin name '{name}'")
         seen.add(name)
     return plugins
+
+
+def plugin_supports(plugin: dict, target: str) -> bool:
+    allowed = plugin["targets"]
+    return allowed is None or target in allowed
+
+
+def skill_supports(skill: dict, plugin: dict, target: str) -> bool:
+    if not plugin_supports(plugin, target):
+        return False
+    allowed = skill["targets"]
+    return allowed is None or target in allowed
+
+
+def active_skills(plugin: dict, target: str) -> list[dict]:
+    return [s for s in plugin["skills"] if skill_supports(s, plugin, target)]
 
 
 # ── Private Repo Cloning ─────────────────────────────────────────────────────
@@ -256,7 +298,15 @@ def translate_mcp_for_agy(mcp: dict) -> dict:
 # ── Claude Code Target ───────────────────────────────────────────────────────
 
 
-def write_claude_plugin(plugin: dict, dest: Path) -> None:
+def write_claude_plugin(plugin: dict, dest: Path) -> bool:
+    """Returns False (writing nothing) if the plugin has no claude-code content."""
+    skills = active_skills(plugin, "claude-code")
+    has_content = bool(
+        skills or plugin["hooks"] or plugin["mcp"] or plugin["commands_dir"] or plugin["agents_dir"]
+    )
+    if not has_content:
+        return False
+
     meta = plugin["meta"]
     dest.mkdir(parents=True, exist_ok=True)
 
@@ -268,9 +318,9 @@ def write_claude_plugin(plugin: dict, dest: Path) -> None:
             manifest[field] = meta[field]
     (claude_plugin_dir / "plugin.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
-    if plugin["skills"]:
+    if skills:
         skills_out = dest / "skills"
-        for s in plugin["skills"]:
+        for s in skills:
             shutil.copytree(s["dir"], skills_out / s["frontmatter"]["name"])
 
     for optional_dir in ("commands_dir", "agents_dir"):
@@ -288,6 +338,8 @@ def write_claude_plugin(plugin: dict, dest: Path) -> None:
     if plugin["mcp"] is not None:
         (dest / ".mcp.json").write_text(json.dumps(plugin["mcp"], indent=2) + "\n", encoding="utf-8")
 
+    return True
+
 
 def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
     # Generated output lives under dist/claude-code/ — never inside plugins/,
@@ -300,25 +352,26 @@ def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
     marketplace_entries = []
     for p in plugins:
         name = p["meta"]["name"]
-        write_claude_plugin(p, plugins_out / name)
-        marketplace_entries.append({"name": name, "source": f"./dist/claude-code/{name}"})
+        if write_claude_plugin(p, plugins_out / name):
+            marketplace_entries.append({"name": name, "source": f"./dist/claude-code/{name}"})
 
     bundle_id = manifest["bundle"]["id"]
-    bundle_dest = plugins_out / bundle_id
-    (bundle_dest / ".claude-plugin").mkdir(parents=True)
-    (bundle_dest / ".claude-plugin" / "plugin.json").write_text(
-        json.dumps(
-            {"name": bundle_id, "description": f"{manifest['marketplace']['description']} (all skills)"},
-            indent=2,
+    bundle_skills = [(p, s) for p in plugins for s in active_skills(p, "claude-code")]
+    if bundle_skills:
+        bundle_dest = plugins_out / bundle_id
+        (bundle_dest / ".claude-plugin").mkdir(parents=True)
+        (bundle_dest / ".claude-plugin" / "plugin.json").write_text(
+            json.dumps(
+                {"name": bundle_id, "description": f"{manifest['marketplace']['description']} (all skills)"},
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
         )
-        + "\n",
-        encoding="utf-8",
-    )
-    bundle_skills = bundle_dest / "skills"
-    for p in plugins:
-        for s in p["skills"]:
-            shutil.copytree(s["dir"], bundle_skills / s["frontmatter"]["name"])
-    marketplace_entries.append({"name": bundle_id, "source": f"./dist/claude-code/{bundle_id}"})
+        bundle_skills_dir = bundle_dest / "skills"
+        for _, s in bundle_skills:
+            shutil.copytree(s["dir"], bundle_skills_dir / s["frontmatter"]["name"])
+        marketplace_entries.append({"name": bundle_id, "source": f"./dist/claude-code/{bundle_id}"})
 
     marketplace = {
         "name": manifest["marketplace"]["name"],
@@ -334,15 +387,21 @@ def gen_claude_code(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
 # ── Antigravity CLI (agy) Target ─────────────────────────────────────────────
 
 
-def write_agy_plugin(plugin: dict, dest: Path) -> None:
+def write_agy_plugin(plugin: dict, dest: Path) -> bool:
+    """Returns False (writing nothing) if the plugin has no agy content."""
+    skills = active_skills(plugin, "agy")
+    has_content = bool(skills or plugin["rules_dir"] or plugin["hooks"] or plugin["mcp"])
+    if not has_content:
+        return False
+
     meta = plugin["meta"]
     name = meta["name"]
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "plugin.json").write_text(json.dumps({"name": name}, indent=2) + "\n", encoding="utf-8")
 
-    if plugin["skills"]:
+    if skills:
         skills_out = dest / "skills"
-        for s in plugin["skills"]:
+        for s in skills:
             shutil.copytree(s["dir"], skills_out / s["frontmatter"]["name"])
 
     if plugin["rules_dir"] is not None:
@@ -358,6 +417,8 @@ def write_agy_plugin(plugin: dict, dest: Path) -> None:
             json.dumps(translate_mcp_for_agy(plugin["mcp"]), indent=2) + "\n", encoding="utf-8"
         )
 
+    return True
+
 
 def gen_agy(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
     agy_dir = out_dir / "dist" / "agy"
@@ -369,13 +430,14 @@ def gen_agy(manifest: dict, plugins: list[dict], out_dir: Path) -> None:
         write_agy_plugin(p, agy_dir / p["meta"]["name"])
 
     bundle_id = manifest["bundle"]["id"]
-    bundle_dest = agy_dir / bundle_id
-    bundle_dest.mkdir(parents=True)
-    (bundle_dest / "plugin.json").write_text(json.dumps({"name": bundle_id}, indent=2) + "\n", encoding="utf-8")
-    bundle_skills = bundle_dest / "skills"
-    for p in plugins:
-        for s in p["skills"]:
-            shutil.copytree(s["dir"], bundle_skills / s["frontmatter"]["name"])
+    bundle_skills = [(p, s) for p in plugins for s in active_skills(p, "agy")]
+    if bundle_skills:
+        bundle_dest = agy_dir / bundle_id
+        bundle_dest.mkdir(parents=True)
+        (bundle_dest / "plugin.json").write_text(json.dumps({"name": bundle_id}, indent=2) + "\n", encoding="utf-8")
+        bundle_skills_dir = bundle_dest / "skills"
+        for _, s in bundle_skills:
+            shutil.copytree(s["dir"], bundle_skills_dir / s["frontmatter"]["name"])
 
     dist_readme = out_dir / "dist" / "README.md"
     dist_readme.write_text(
@@ -474,7 +536,7 @@ def main() -> int:
 
             layers = collect_layers(source_roots)
             merged_root = merge_layers(layers, workdir)
-            plugins = discover_plugins(merged_root)
+            plugins = discover_plugins(merged_root, manifest["targets"])
 
             if args.check:
                 print(f"OK: {len(plugins)} plugin(s), {len(manifest['targets'])} target(s) validated")

@@ -4,6 +4,7 @@ description: Delegates a subtask to the Antigravity CLI (agy) when the user want
 version: 1.0.0
 user-invocable: true
 author: Rootiest
+targets: [claude-code]
 ---
 
 # Antigravity Subagent Delegation (`delegate-agy`)
