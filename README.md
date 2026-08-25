@@ -23,6 +23,7 @@ from one source tree and published as a native marketplace for both tools.
   - [gitea-mcp](#gitea-mcp)
   - [caveman](#caveman)
   - [ponytail](#ponytail)
+  - [mattpocock-skills](#mattpocock-skills)
 - [Installation](#installation)
   - [Claude Code](#claude-code)
   - [Antigravity CLI (agy)](#antigravity-cli-agy)
@@ -184,6 +185,17 @@ that actually works (YAGNI, stdlib first, no unrequested abstractions).
 Also third-party, from
 [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail),
 installed the same external-source way as `caveman` above. Claude Code-only.
+
+---
+
+### `mattpocock-skills`
+
+**Purpose:** Matt Pocock's agent skills for real engineering — grilling,
+spec/ticket flows, TDD, code review, domain modelling and more.
+
+Also third-party, from
+[mattpocock/skills](https://github.com/mattpocock/skills), installed the
+same external-source way as `caveman`/`ponytail` above. Claude Code-only.
 
 ---
 
