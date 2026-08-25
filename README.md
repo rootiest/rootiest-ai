@@ -207,10 +207,25 @@ install script. Each plugin can be installed individually, or as one bundle
 
 ### Claude Code
 
+From inside a Claude Code session:
+
 ```
-/plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git
+/plugin marketplace add rootiest/rootiest-ai
 /plugin install git-publish-workflow@rootiest-ai
 ```
+
+Or from a regular shell, before starting a session:
+
+```bash
+claude plugin marketplace add rootiest/rootiest-ai
+```
+
+The `owner/repo` shorthand resolves against GitHub, so it works because
+this repo is mirrored to
+[github.com/rootiest/rootiest-ai](https://github.com/rootiest/rootiest-ai)
+on every push to our canonical Gitea remote. If you're pointing at a fork
+or a private mirror instead, use the full clone URL:
+`/plugin marketplace add https://git.rootiest.dev/rootiest/rootiest-ai.git`.
 
 Install everything at once:
 
