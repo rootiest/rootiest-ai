@@ -21,6 +21,8 @@ from one source tree and published as a native marketplace for both tools.
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
+  - [caveman](#caveman)
+  - [ponytail](#ponytail)
 - [Installation](#installation)
   - [Claude Code](#claude-code)
   - [Antigravity CLI (agy)](#antigravity-cli-agy)
@@ -158,6 +160,33 @@ both, or neither independently.
 
 ---
 
+### `caveman`
+
+**Purpose:** Ultra-compressed communication mode — cuts output tokens while
+keeping full technical accuracy.
+
+This is a third-party plugin from
+[JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman), not
+maintained in this repo. Our marketplace entry points straight at that
+repo's own `.claude-plugin/plugin.json` (via `source: {"source": "github",
+"repo": "JuliusBrussee/caveman"}`), so installing it through us always
+fetches the current upstream version — nothing is vendored or copied.
+Claude Code-only; see [Antigravity CLI (agy)](#antigravity-cli-agy) below
+for why.
+
+---
+
+### `ponytail`
+
+**Purpose:** Lazy senior dev mode — forces the simplest, shortest solution
+that actually works (YAGNI, stdlib first, no unrequested abstractions).
+
+Also third-party, from
+[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail),
+installed the same external-source way as `caveman` above. Claude Code-only.
+
+---
+
 ## Installation
 
 This repository is a native plugin marketplace for both tools — there is no
@@ -180,6 +209,12 @@ Install everything at once:
 Run `/plugin marketplace update` to pick up newly published plugins.
 
 ### Antigravity CLI (`agy`)
+
+Third-party plugins pulled in via `external` (see below) aren't offered
+here at all — agy has no marketplace-style external-source mechanism, and
+their hooks/MCP servers are built assuming Claude Code's plugin runtime
+(e.g. resolving `${CLAUDE_PLUGIN_ROOT}`), so there'd be nothing correct to
+translate even if we vendored them.
 
 agy documents a `plugins.json` "entries" mechanism for pointing it at an
 external directory of plugins, but empirically it doesn't reliably load
@@ -241,6 +276,30 @@ verbatim where the two tools' schemas diverge:
 - `rules/` has no Claude Code plugin equivalent and is skipped for that
   target; `commands/`/`agents/` have no agy equivalent and are skipped for
   that target.
+
+A plugin can instead declare `external` in its `plugin.json` — a
+target-keyed map of Claude Code marketplace `source` objects — to point at
+a third-party plugin we don't own or vendor, instead of carrying any of
+the local content above:
+
+```json
+{
+  "name": "caveman",
+  "description": "...",
+  "targets": ["claude-code"],
+  "external": {
+    "claude-code": { "source": "github", "repo": "owner/repo" }
+  }
+}
+```
+
+The generator emits that `source` object verbatim into
+`.claude-plugin/marketplace.json` instead of a local `./dist/...` path, so
+`/plugin install` fetches the plugin's real content straight from upstream
+at install time — it's never copied into this repo and never goes stale.
+A plugin with `external` must not also carry local skills/hooks/mcp/rules/
+commands/agents, and today only the `claude-code` target supports it (see
+[caveman](#caveman) and [ponytail](#ponytail) above).
 
 ### Restricting a Plugin (or a Skill) to Specific Targets
 

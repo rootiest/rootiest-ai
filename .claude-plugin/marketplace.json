@@ -7,6 +7,13 @@
   "description": "Reusable AI skills for Claude Code and Antigravity CLI",
   "plugins": [
     {
+      "name": "caveman",
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    },
+    {
       "name": "core-essentials",
       "source": "./dist/claude-code/core-essentials"
     },
@@ -29,6 +36,13 @@
     {
       "name": "github-mcp",
       "source": "./dist/claude-code/github-mcp"
+    },
+    {
+      "name": "ponytail",
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
     },
     {
       "name": "readme-sync-audit",
