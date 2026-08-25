@@ -8,6 +8,10 @@
   "plugins": [
     {
       "name": "caveman",
+      "description": "Ultra-compressed communication mode from JuliusBrussee/caveman \u2014 cuts output tokens while keeping full technical accuracy. Installed straight from the upstream repo, not vendored here.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": {
         "source": "github",
         "repo": "JuliusBrussee/caveman"
@@ -15,30 +19,58 @@
     },
     {
       "name": "core-essentials",
+      "description": "Core cross-tool utilities, including delegation to the Antigravity CLI (agy) for grounded research and large multi-file audits.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/core-essentials"
     },
     {
       "name": "date-time",
+      "description": "Retrieves the exact current date and time for time-sensitive queries, scheduling, duration calculations, and validating chronological context.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/date-time"
     },
     {
       "name": "docs-sync-audit",
+      "description": "Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/docs-sync-audit"
     },
     {
       "name": "git-publish-workflow",
+      "description": "Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/git-publish-workflow"
     },
     {
       "name": "gitea-mcp",
+      "description": "Connects Claude Code/agy to a Gitea instance via the official gitea-mcp server, authenticated with GITEA_HOST/GITEA_ACCESS_TOKEN you set locally.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/gitea-mcp"
     },
     {
       "name": "github-mcp",
+      "description": "Connects Claude Code/agy to GitHub via the official MCP server, authenticated with a GITHUB_PERSONAL_ACCESS_TOKEN you set locally.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/github-mcp"
     },
     {
       "name": "mattpocock-skills",
+      "description": "Matt Pocock's agent skills for real engineering from mattpocock/skills \u2014 grilling, spec/ticket flows, TDD, code review, domain modelling and more. Installed straight from the upstream repo, not vendored here.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": {
         "source": "github",
         "repo": "mattpocock/skills"
@@ -46,10 +78,18 @@
     },
     {
       "name": "mirror-it",
+      "description": "Configures a Gitea repository to automatically push-mirror its contents to GitHub using the tea CLI and jq.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/mirror-it"
     },
     {
       "name": "ponytail",
+      "description": "Lazy senior dev mode from DietrichGebert/ponytail \u2014 forces the simplest, shortest solution that actually works (YAGNI, stdlib first, no unrequested abstractions). Installed straight from the upstream repo, not vendored here.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": {
         "source": "github",
         "repo": "DietrichGebert/ponytail"
@@ -57,22 +97,39 @@
     },
     {
       "name": "readme-sync-audit",
+      "description": "Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/readme-sync-audit"
     },
     {
       "name": "ship-it",
+      "description": "Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/ship-it"
     },
     {
       "name": "systematic-enumeration",
+      "description": "Forces element-by-element verification for finite sets to prevent counting errors.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/systematic-enumeration"
     },
     {
       "name": "technical-devlog-scribe",
+      "description": "Generates a highly structured, objective technical summary of a development session.",
+      "author": {
+        "name": "Rootiest"
+      },
       "source": "./dist/claude-code/technical-devlog-scribe"
     },
     {
       "name": "rootiest-ai-all",
+      "description": "Reusable AI skills for Claude Code and Antigravity CLI (all skills)",
       "source": "./dist/claude-code/rootiest-ai-all"
     }
   ]

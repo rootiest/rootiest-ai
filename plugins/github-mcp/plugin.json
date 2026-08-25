@@ -2,5 +2,5 @@
   "name": "github-mcp",
   "description": "Connects Claude Code/agy to GitHub via the official MCP server, authenticated with a GITHUB_PERSONAL_ACCESS_TOKEN you set locally.",
   "version": "1.0.0",
-  "author": "Rootiest"
+  "author": { "name": "Rootiest" }
 }

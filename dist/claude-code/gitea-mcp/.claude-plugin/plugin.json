@@ -2,5 +2,7 @@
   "name": "gitea-mcp",
   "description": "Connects Claude Code/agy to a Gitea instance via the official gitea-mcp server, authenticated with GITEA_HOST/GITEA_ACCESS_TOKEN you set locally.",
   "version": "1.0.0",
-  "author": "Rootiest"
+  "author": {
+    "name": "Rootiest"
+  }
 }
