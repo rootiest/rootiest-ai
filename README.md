@@ -41,90 +41,142 @@ from one source tree and published as a native marketplace for both tools.
 
 ### `systematic-enumeration`
 
-**Purpose:** Eliminate counting and membership errors caused by the model's tendency toward holistic pattern recognition.
+**Purpose:** Eliminate counting and membership errors caused by the model's
+tendency toward holistic pattern recognition.
 
 When invoked, the AI is required to work through three explicit phases:
 
-1. **Set Definition** — enumerate every member of the finite set before any analysis begins.
-2. **Atomic Element Testing** — test each item individually, producing a `[Item] → [Logic] → [Boolean]` record for every element. For character-level checks, the string is split into individual characters to bypass tokenization bias.
-3. **Reduction & Summation** — aggregate results and self-verify that the number of items tested exactly matches the set size; if there is a mismatch, Phase 2 restarts.
+1. **Set Definition** — enumerate every member of the finite set before any
+   analysis begins.
+2. **Atomic Element Testing** — test each item individually, producing a
+   `[Item] → [Logic] → [Boolean]` record for every element. For
+   character-level checks, the string is split into individual characters to
+   bypass tokenization bias.
+3. **Reduction & Summation** — aggregate results and self-verify that the number
+   of items tested exactly matches the set size; if there is a mismatch, Phase 2
+   restarts.
 
-**Use when:** counting characters in a string, verifying a property across a list of files or variables, or any membership test where a false negative carries real cost.
+**Use when:** counting characters in a string, verifying a property across a
+list of files or variables, or any membership test where a false negative
+carries real cost.
 
 ---
 
 ### `git-publish-workflow`
 
-**Purpose:** Automate the full lifecycle from uncommitted local work to an open Pull Request, with built-in quality gates.
+**Purpose:** Automate the full lifecycle from uncommitted local work to an open
+Pull Request, with built-in quality gates.
 
 The workflow runs three phases:
 
-1. **Scope Determination** — if staged changes exist, operate only on those; otherwise operate on all modified/untracked files.
-2. **Safe-Commit Sequence** — generate a `kebab-case` branch name, compose a [Conventional Commits](https://www.conventionalcommits.org/) message, then run the project's primary test/lint/build command. If verification fails, the sequence stops — nothing is pushed.
-3. **Remote Integration** — push the branch, open a PR against the default branch, and populate the description with a "Why/What" summary and a manual verification checklist (`- [ ]` items).
+1. **Scope Determination** — if staged changes exist, operate only on those;
+   otherwise operate on all modified/untracked files.
+2. **Safe-Commit Sequence** — generate a `kebab-case` branch name, compose a
+   [Conventional Commits](https://www.conventionalcommits.org/) message, then
+   run the project's primary test/lint/build command. If verification fails, the
+   sequence stops — nothing is pushed.
+3. **Remote Integration** — push the branch, open a PR against the default
+   branch, and populate the description with a "Why/What" summary and a manual
+   verification checklist (`- [ ]` items).
 
-**Use when:** you say "Ship this," "Make a PR," or invoke `/git-publish-workflow`.
+**Use when:** you say "Ship this," "Make a PR," or invoke
+`/git-publish-workflow`.
 
 ---
 
 ### `readme-sync-audit`
 
-**Purpose:** Keep `README.md` accurate by programmatically aligning it with the current state of the codebase.
+**Purpose:** Keep `README.md` accurate by programmatically aligning it with the
+current state of the codebase.
 
 Three-phase execution:
 
-1. **Delta Analysis** — locate the last commit that touched `README.md`, diff all code changes from that point to `HEAD`, and extract undocumented environment variables, CLI flags, or API changes.
-2. **Pruning & Update Audit** — remove stale setup steps or "Coming Soon" notes, correct version numbers and file paths, and synthesize documentation for newly discovered features.
-3. **Structural Integrity Check** — verify that Quick Start commands still work, all config keys are listed, and code snippets match the current API.
+1. **Delta Analysis** — locate the last commit that touched `README.md`, diff
+   all code changes from that point to `HEAD`, and extract undocumented
+   environment variables, CLI flags, or API changes.
+2. **Pruning & Update Audit** — remove stale setup steps or "Coming Soon" notes,
+   correct version numbers and file paths, and synthesize documentation for
+   newly discovered features.
+3. **Structural Integrity Check** — verify that Quick Start commands still work,
+   all config keys are listed, and code snippets match the current API.
 
-**Use when:** you say "Update the docs," "Sync the README," or invoke `/readme-sync-audit`.
+**Use when:** you say "Update the docs," "Sync the README," or invoke
+`/readme-sync-audit`.
 
 ---
 
 ### `docs-sync-audit`
 
-**Purpose:** Keep documentation accurate by aligning the project's Single Source of Truth (SSoT) with the current state of the codebase.
+**Purpose:** Keep documentation accurate by aligning the project's Single
+Source of Truth (SSoT) with the current state of the codebase.
 
-Unlike `readme-sync-audit`, this skill first discovers the documentation root. If a dedicated `docs/`, `wiki/`, or site config (e.g. `mkdocs.yml`) exists, it is treated as the SSoT and receives the detailed updates; the `README.md` is then kept as a high-level landing page that links into it. If no docs directory exists, it falls back to `README.md` as the SSoT.
+Unlike `readme-sync-audit`, this skill first discovers the documentation root.
+If a dedicated `docs/`, `wiki/`, or site config (e.g. `mkdocs.yml`) exists, it is
+treated as the SSoT and receives the detailed updates; the `README.md` is then
+kept as a high-level landing page that links into it. If no docs directory
+exists, it falls back to `README.md` as the SSoT.
 
 Three-phase execution:
 
-1. **Delta Analysis** — locate the last commit that touched the SSoT, diff all code changes to `HEAD`, and extract undocumented environment variables, CLI flags, or API changes.
-2. **Pruning & Update Audit** — route detailed changes to the correct files, remove stale steps, correct versions and paths, and synthesize docs for new features.
-3. **Structural Integrity Check** — verify Quick Start commands, configuration keys, and usage examples still match the implementation.
+1. **Delta Analysis** — locate the last commit that touched the SSoT, diff all
+   code changes to `HEAD`, and extract undocumented environment variables, CLI
+   flags, or API changes.
+2. **Pruning & Update Audit** — route detailed changes to the correct files,
+   remove stale steps, correct versions and paths, and synthesize docs for new
+   features.
+3. **Structural Integrity Check** — verify Quick Start commands, configuration
+   keys, and usage examples still match the implementation.
 
-**Use when:** you say "Update the docs," "Sync the wiki," or invoke `/docs-sync-audit`.
+**Use when:** you say "Update the docs," "Sync the wiki," or invoke
+`/docs-sync-audit`.
 
 ---
 
 ### `date-time`
 
-**Purpose:** Retrieve the exact, real-time current date and time when a task depends on the present moment.
+**Purpose:** Retrieve the exact, real-time current date and time when a task
+depends on the present moment.
 
-The skill runs the system `date` command rather than guessing, then uses the result for time-sensitive reasoning.
+The skill runs the system `date` command rather than guessing, then uses the
+result for time-sensitive reasoning.
 
-**Use when:** the request asks for the current date/time, uses relative expressions ("today", "next week", "recently"), or needs an age, duration, countdown, or check of whether an event has already occurred.
+**Use when:** the request asks for the current date/time, uses relative
+expressions ("today", "next week", "recently"), or needs an age, duration,
+countdown, or check of whether an event has already occurred.
 
 ---
 
 ### `technical-devlog-scribe`
 
-**Purpose:** Produce a dense, objective technical summary of a development session as a durable historical record optimized for future context loading.
+**Purpose:** Produce a dense, objective technical summary of a development
+session as a durable historical record optimized for future context loading.
 
-The skill writes a structured Markdown file to `AGENTS/devlogs/<kebab-case-short-description>.md`, with YAML frontmatter (date, title, tags, status) followed by the session summary. It relies strictly on what happened in the session — no hallucinated external constraints — and avoids conversational filler.
+The skill writes a structured Markdown file to
+`AGENTS/devlogs/<kebab-case-short-description>.md`, with YAML frontmatter (date,
+title, tags, status) followed by the session summary. It relies strictly on
+what happened in the session — no hallucinated external constraints — and
+avoids conversational filler.
 
-**Use when:** you say "session wrap-up," "write a devlog," "done for the day," or want an auditable record of what changed and why.
+**Use when:** you say "session wrap-up," "write a devlog," "done for the day,"
+or want an auditable record of what changed and why.
 
 ---
 
 ### `ship-it`
 
-**Purpose:** Run a comprehensive pre-flight audit and publish changes to a new PR in a single command.
+**Purpose:** Run a comprehensive pre-flight audit and publish changes to a new
+PR in a single command.
 
 Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 
-1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all file changes since the last documentation edit, updates the docs/README to match the current codebase, and audits code files for syntax errors or regressions. **Halts the entire workflow** if any breaking issue is found.
-2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a descriptively named branch, commits all pending changes (including the README updates from Phase 1), pushes to the remote, and opens a Pull Request against `main`.
+1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all
+   file changes since the last documentation edit, updates the docs/README to
+   match the current codebase, and audits code files for syntax errors or
+   regressions. **Halts the entire workflow** if any breaking issue is found.
+2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a
+   descriptively named branch, commits all pending changes (including the
+   README updates from Phase 1), pushes to the remote, and opens a Pull Request
+   against `main`.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
@@ -132,11 +184,19 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 
 ### `mirror-it`
 
-**Purpose:** Register a Gitea push mirror so a repository's commits are automatically forwarded to a corresponding GitHub repository.
+**Purpose:** Register a Gitea push mirror so a repository's commits are
+automatically forwarded to a corresponding GitHub repository.
 
-Uses `tea api` against Gitea's `push_mirrors` endpoint, with credentials passed as `remote_username`/`remote_password` fields — never embedded in the mirror URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are overridable per request, as is the destination repository name. `GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a repo-root `.env` file. All shell snippets are POSIX-compatible so the skill works under bash, zsh, or any shell the agent's tool happens to invoke — not just Fish.
+Uses `tea api` against Gitea's `push_mirrors` endpoint, with credentials passed
+as `remote_username`/`remote_password` fields — never embedded in the mirror
+URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are
+overridable per request, as is the destination repository name.
+`GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a
+repo-root `.env` file.
 
-**Use when:** you say "Mirror this repository to GitHub," or invoke `/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't push-mirror to itself.
+**Use when:** you say "Mirror this repository to GitHub," or invoke
+`/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
+push-mirror to itself.
 
 ---
 
