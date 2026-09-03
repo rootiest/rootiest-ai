@@ -1,7 +1,7 @@
 ---
 name: mirror-it
 description: Configures a Gitea repository to automatically push-mirror its contents to GitHub using the `tea` CLI and `jq`.
-version: 1.0.0
+version: 1.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -40,6 +40,10 @@ Activate this skill ONLY when one of the following is met:
 - `$GITHUB_USER` and `$GITHUB_TOKEN` (a GitHub PAT with `repo` scope) are available before step 3
   below — either already exported in the environment, or defined in a `.env` file at the
   repository root (see step 1).
+- Optionally, one of the following for the target-repo check/creation in step 4: the `gh` CLI
+  (authenticated — `gh auth status`), a GitHub MCP server, or plain `$GITHUB_TOKEN` used directly
+  against the GitHub REST API via `curl`. The first of these that's available is used; if none
+  are, step 4 degrades to a warning instead of blocking the skill.
 
 ## Defaults & Overrides
 Unless the user says otherwise, assume:
@@ -64,9 +68,48 @@ name 'exmpl_cfg'" → `$TARGET_REPO` becomes `exmpl_cfg`, `$SYNC_ON_COMMIT` beco
 2. Identify the current Gitea repository's owner (`$OWNER`) and name (`$SOURCE_REPO`).
 3. Determine `$TARGET_REPO`, `$INTERVAL`, and `$SYNC_ON_COMMIT` from the defaults above,
    applying any user overrides.
-4. Run the following snippet, substituting those values. Credentials are passed as separate
-   `remote_username`/`remote_password` fields — never embedded in the mirror URL — per Gitea's
-   `CreatePushMirrorOption` schema.
+4. **Ensure the GitHub target repository exists.** GitHub, unlike Gitea, does not create a
+   repository on first push — if `$GITHUB_USER/$TARGET_REPO` doesn't exist yet, the mirror will
+   register successfully but every sync attempt will fail. Check for the repo and create it if
+   missing, using whichever of these is available (in order of preference):
+
+   - **`gh` CLI** (preferred if authenticated — `gh auth status`):
+     ```sh
+     if ! gh repo view "$GITHUB_USER/$TARGET_REPO" >/dev/null 2>&1; then
+       gh repo create "$GITHUB_USER/$TARGET_REPO" --private --description "Push mirror of $OWNER/$SOURCE_REPO"
+     fi
+     ```
+     Match visibility to the source repo where you can determine it (e.g. via `tea api
+     "repos/$OWNER/$SOURCE_REPO"` → `.private`); otherwise default to `--private` and mention the
+     choice when reporting the outcome.
+   - **GitHub MCP server**, if one is connected: use its repo-lookup tool to check for
+     `$GITHUB_USER/$TARGET_REPO`, and its repo-creation tool to create it (private by default) if
+     absent.
+   - **Plain REST API via `curl`**, using `$GITHUB_TOKEN` directly, if neither of the above is
+     available:
+     ```sh
+     status=$(curl -s -o /dev/null -w '%{http_code}' \
+       -H "Authorization: Bearer $GITHUB_TOKEN" \
+       "https://api.github.com/repos/$GITHUB_USER/$TARGET_REPO")
+     if [ "$status" = "404" ]; then
+       curl -s -X POST \
+         -H "Authorization: Bearer $GITHUB_TOKEN" \
+         -H "Accept: application/vnd.github+json" \
+         https://api.github.com/user/repos \
+         -d "$(jq -n --arg name "$TARGET_REPO" '{name: $name, private: true}')" \
+         >/dev/null
+     fi
+     ```
+   - **If none of these are available**, don't block on it — proceed to step 5, but warn the user
+     clearly that they must create `$GITHUB_USER/$TARGET_REPO` on GitHub themselves before the
+     mirror's first sync will succeed.
+
+   If a repo already exists at the target address, leave it as-is and continue — do not treat this
+   as an error.
+
+5. Run the following snippet, substituting the values from steps 2–3. Credentials are passed as
+   separate `remote_username`/`remote_password` fields — never embedded in the mirror URL — per
+   Gitea's `CreatePushMirrorOption` schema.
 
 ```sh
 # $OWNER / $SOURCE_REPO identify the local Gitea API endpoint.
@@ -85,4 +128,6 @@ payload=$(jq -n \
 tea api --method POST --data "$payload" "repos/$OWNER/$SOURCE_REPO/push_mirrors"
 ```
 
-5. Report the outcome to the user, without echoing the request body, `.env` contents, or token.
+6. Report the outcome to the user, without echoing the request body, `.env` contents, or token —
+   including whether the GitHub repo already existed or was just created, and, if step 4 had no
+   capability to check/create it, a reminder that they need to create it manually.
