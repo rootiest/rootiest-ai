@@ -167,7 +167,7 @@ or want an auditable record of what changed and why.
 **Purpose:** Run a comprehensive pre-flight audit and publish changes to a new
 PR in a single command.
 
-Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
+Three sequential phases — each is blocked until the previous one succeeds:
 
 1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all
    file changes since the last documentation edit, updates the docs/README to
@@ -177,6 +177,11 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
    descriptively named branch, commits all pending changes (including the
    README updates from Phase 1), pushes to the remote, and opens a Pull Request
    against `main`.
+3. **Post-Publish Attribution Scrub** — only runs if a global/user/project
+   rule forbids AI attribution footers. Checks the commit(s) and PR
+   description as actually persisted (not just what was composed) for
+   attribution text sneaked in by hooks outside the visible conversation, and
+   strips it via `git commit --amend` + force-push and `gh pr edit`.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
@@ -187,12 +192,19 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 **Purpose:** Register a Gitea push mirror so a repository's commits are
 automatically forwarded to a corresponding GitHub repository.
 
-Uses `tea api` against Gitea's `push_mirrors` endpoint, with credentials passed
-as `remote_username`/`remote_password` fields — never embedded in the mirror
+Before registering the mirror, checks whether the GitHub target repository
+exists and creates it if missing (via `gh`, a GitHub MCP server, or the REST
+API directly — whichever is available), since GitHub won't auto-create it on
+first push the way Gitea does; if none of those are available it warns the
+user to create it manually instead of blocking. Uses `tea api` against
+Gitea's `push_mirrors` endpoint, with credentials passed as
+`remote_username`/`remote_password` fields — never embedded in the mirror
 URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are
 overridable per request, as is the destination repository name.
 `GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a
-repo-root `.env` file.
+repo-root `.env` file. All shell snippets are POSIX-compatible so the skill
+works under bash, zsh, or any shell the agent's tool happens to invoke — not
+just Fish.
 
 **Use when:** you say "Mirror this repository to GitHub," or invoke
 `/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
