@@ -167,7 +167,7 @@ or want an auditable record of what changed and why.
 **Purpose:** Run a comprehensive pre-flight audit and publish changes to a new
 PR in a single command.
 
-Three sequential phases — each is blocked until the previous one succeeds:
+Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
 
 1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all
    file changes since the last documentation edit, updates the docs/README to
@@ -177,11 +177,6 @@ Three sequential phases — each is blocked until the previous one succeeds:
    descriptively named branch, commits all pending changes (including the
    README updates from Phase 1), pushes to the remote, and opens a Pull Request
    against `main`.
-3. **Post-Publish Attribution Scrub** — only runs if a global/user/project
-   rule forbids AI attribution footers. Checks the commit(s) and PR
-   description as actually persisted (not just what was composed) for
-   attribution text sneaked in by hooks outside the visible conversation, and
-   strips it via `git commit --amend` + force-push and `gh pr edit`.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
