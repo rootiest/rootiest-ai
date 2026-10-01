@@ -167,7 +167,7 @@ or want an auditable record of what changed and why.
 **Purpose:** Run a comprehensive pre-flight audit and publish changes to a new
 PR in a single command.
 
-Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
+Sequential phases — each is blocked until the previous one succeeds:
 
 1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all
    file changes since the last documentation edit, updates the docs/README to
@@ -177,6 +177,17 @@ Two sequential phases — Phase 2 is blocked until Phase 1 succeeds:
    descriptively named branch, commits all pending changes (including the
    README updates from Phase 1), pushes to the remote, and opens a Pull Request
    against `main`.
+3. **CI Verification** — waits on the PR head commit with a single background
+   watcher instead of sleep-polling. On GitHub it uses
+   `gh pr checks --watch --fail-fast`; on Gitea it runs the bundled
+   `scripts/tea-ci-watch.sh` (requires `tea` and `jq`), which waits until every
+   Actions run for the commit — including runs still queued, which Gitea does
+   not yet report as commit statuses — has completed and the combined commit
+   status is no longer pending. Fails fast on the first failed or cancelled
+   check. Then reports the PR link and CI result and stops; you merge.
+4. **Post-Merge Sync** — only when you say the PR is merged (or ask it to
+   merge): watches CI on the merge commit the same way, then fast-forwards
+   local `main` to pick up any automated commits.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
