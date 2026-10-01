@@ -28,9 +28,9 @@ Execute the following phases sequentially. Do not proceed to the next phase unle
    - Wait for CI on the PR head commit with ONE blocking watcher. Never poll with `sleep` or repeated status checks.
    - Run the watcher as a background command (Claude Code: Bash `run_in_background: true`); you are re-invoked when it exits. Without background support, run it in the foreground with a tool timeout longer than the watcher's.
    - Derive `<owner>/<repo>` and the platform from `git remote get-url origin`.
-   - Gitea:
+   - Gitea: run the bundled watcher, `scripts/tea-ci-watch.sh` in this skill's directory (the directory holding this SKILL.md). Use its absolute path; it is not on `PATH`. Requires `tea` (logged in) and `jq`.
      ```bash
-     tea-ci-watch "<owner>/<repo>" "$(git rev-parse HEAD)"
+     bash "<skill-dir>/scripts/tea-ci-watch.sh" "<owner>/<repo>" "$(git rev-parse HEAD)"
      ```
      | Exit | Meaning | Action |
      |------|---------|--------|

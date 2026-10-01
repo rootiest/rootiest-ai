@@ -359,12 +359,17 @@ generator. A plugin can bundle any subset of:
 plugins/<name>/
 ├── plugin.json          # required: name, description, version, author
 ├── skills/<skill>/SKILL.md   # 0+ skills (YAML frontmatter: name, description, version, author)
+├── skills/<skill>/scripts/   # optional: helper scripts, shipped with the skill
 ├── hooks.json            # optional: lifecycle hooks, Claude-shaped event → matcher groups
 ├── mcp.json              # optional: {"mcpServers": {...}}
 ├── rules/AGENTS.md        # optional: agy-only, always-on project rules
 ├── commands/*.md          # optional: Claude Code-only slash commands
 └── agents/*.md            # optional: Claude Code-only subagents
 ```
+
+Anything else at the plugin root fails validation, since the generator would
+not ship it. Each skill directory is copied whole, so a skill reaches its
+helper scripts by a path relative to its own `SKILL.md`.
 
 `hooks.json` and `mcp.json` are translated per target rather than copied
 verbatim where the two tools' schemas diverge:
