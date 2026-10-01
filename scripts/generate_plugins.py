@@ -7,7 +7,9 @@ A "plugin" is a directory under `plugins/<name>/` that may bundle any mix of:
                          optional targets: ["claude-code", "agy", ...] — restricts the
                          WHOLE plugin, including its hooks/mcp/rules/commands/agents, to
                          only the listed targets; default is every target in manifest.yaml)
-  - skills/<name>/SKILL.md   (0+ skills; a skill's own frontmatter may also declare
+  - skills/<name>/SKILL.md   (0+ skills; the whole skill directory is shipped verbatim,
+                         so helper scripts belong in skills/<name>/scripts/; a
+                         skill's own frontmatter may also declare
                          `targets:` to further restrict just that one skill, independent
                          of its sibling skills — narrowed to, never wider than, the
                          plugin's own `targets`)
@@ -75,6 +77,9 @@ REQUIRED_SKILL_FIELDS = ("name", "description")
 # agy only documents these five hook events; everything else is Claude-only.
 AGY_GROUPED_EVENTS = ("PreToolUse", "PostToolUse")
 AGY_FLAT_EVENTS = ("PreInvocation", "PostInvocation", "Stop")
+
+# Everything else at a plugin's root would be silently dropped from dist/, so reject it.
+PLUGIN_ENTRIES = {"plugin.json", "skills", "hooks.json", "mcp.json", "rules", "commands", "agents"}
 
 
 class ValidationError(Exception):
@@ -196,6 +201,12 @@ def discover_plugins(merged_root: Path, valid_targets: list[str]) -> list[dict]:
         if meta.get("name") != plugin_dir.name:
             raise ValidationError(
                 f"{manifest_path}: name '{meta.get('name')}' does not match directory name '{plugin_dir.name}'"
+            )
+        unknown = sorted(e.name for e in plugin_dir.iterdir() if e.name not in PLUGIN_ENTRIES)
+        if unknown:
+            raise ValidationError(
+                f"plugins/{plugin_dir.name}: unsupported entries {unknown} would not be shipped; "
+                "put helper files inside skills/<skill>/ instead"
             )
         for field in REQUIRED_PLUGIN_FIELDS:
             if not meta.get(field):
