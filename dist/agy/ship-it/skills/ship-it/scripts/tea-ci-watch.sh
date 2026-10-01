@@ -15,10 +15,16 @@ SYNOPSIS
     tea-ci-watch [OPTIONS] <owner/repo> <commit-sha> [timeout_seconds]
 
 DESCRIPTION
-    Polls the Gitea combined commit status API (via 'tea api') and blocks until
-    every check on the commit has finished. Designed for automated CI pipelines
-    and agent workflows: run it once, in the background, and act on the exit
-    code instead of sleep-polling.
+    Polls Gitea (via 'tea api') and blocks until every check on the commit has
+    finished. Designed for automated CI pipelines and agent workflows: run it
+    once, in the background, and act on the exit code instead of sleep-polling.
+
+    Two sources are combined. Gitea posts an Actions job's commit status only
+    once a runner picks the job up, so queued workflows are invisible to the
+    combined status; the Actions runs API lists them from the moment they are
+    triggered. The commit is done only when every Actions run for it has
+    completed AND the combined status (which also covers external CI) is no
+    longer pending. The first failure in either source fails fast.
 
     The combined status reports the latest state of each check, so earlier
     'pending' entries for re-run jobs do not affect the result. Skipped jobs
@@ -41,7 +47,8 @@ AUTHENTICATION
 
 RETURNS
     0                   All checks passed (success, warning, or skipped)
-    1                   One or more checks failed; failing jobs are printed
+    1                   One or more checks failed or were cancelled; failing
+                        checks are printed
     2                   Usage, dependency, or API error (bad repo, auth, network)
     3                   No checks registered within the grace period
     124                 Timeout reached with checks still pending
@@ -81,30 +88,48 @@ INTERVAL=5
 
 echo "Waiting for CI completion on ${REPO}@${SHA:0:7}..." >&2
 
-while ((SECONDS < TIMEOUT)); do
-  # 'tea api' exits 0 even on HTTP errors, so a missing .state is the error signal
-  if ! RESPONSE=$(tea api "/repos/${REPO}/commits/${SHA}/status" 2>&1) ||
-    ! STATE=$(jq -er '.state' <<<"$RESPONSE" 2>/dev/null); then
-    echo "ERROR: Status request failed for ${REPO}@${SHA:0:7}: ${RESPONSE}" >&2
+# Fetch a Gitea API path as JSON. 'tea api' exits 0 even on HTTP errors, so the
+# caller-supplied jq probe (which must succeed on a valid body) is the error signal.
+fetch() {
+  local path="$1" probe="$2" body
+  if ! body=$(tea api "$path" 2>&1) || ! jq -e "$probe" <<<"$body" >/dev/null 2>&1; then
+    echo "ERROR: Request ${path} failed for ${REPO}@${SHA:0:7}: ${body}" >&2
     exit 2
   fi
-  COUNT=$(jq -r '.total_count' <<<"$RESPONSE")
+  printf '%s' "$body"
+}
 
-  case "$STATE" in
-  success | warning)
-    echo "SUCCESS: All ${COUNT} checks passed for ${SHA:0:7}." >&2
-    exit 0
-    ;;
-  failure | error)
+while ((SECONDS < TIMEOUT)); do
+  STATUS=$(fetch "/repos/${REPO}/commits/${SHA}/status" '.state | strings') || exit 2
+  RUNS=$(fetch "/repos/${REPO}/actions/runs?head_sha=${SHA}&limit=50" '.workflow_runs | arrays') || exit 2
+
+  STATE=$(jq -r '.state' <<<"$STATUS")
+  COUNT=$(jq -r '.total_count' <<<"$STATUS")
+  RUN_COUNT=$(jq -r '.workflow_runs | length' <<<"$RUNS")
+  RUNS_PENDING=$(jq -r '[.workflow_runs[] | select(.status != "completed")] | length' <<<"$RUNS")
+  RUNS_FAILED=$(jq -r '[.workflow_runs[] | select(.status == "completed"
+      and (.conclusion == "failure" or .conclusion == "cancelled"))] | length' <<<"$RUNS")
+
+  if [[ "$STATE" == failure || "$STATE" == error ]] || ((RUNS_FAILED > 0)); then
     echo "ERROR: One or more checks failed for ${SHA:0:7}:" >&2
     jq -r '.statuses[] | select(.status == "failure" or .status == "error")
-      | "  \(.context): \(.description) (\(.target_url))"' <<<"$RESPONSE" >&2
+      | "  \(.context): \(.description) (\(.target_url))"' <<<"$STATUS" >&2
+    jq -r '.workflow_runs[] | select(.status == "completed"
+        and (.conclusion == "failure" or .conclusion == "cancelled"))
+      | "  \(.path) [\(.event)]: \(.conclusion) (\(.html_url))"' <<<"$RUNS" >&2
     exit 1
-    ;;
-  esac
+  fi
+
+  # Done only when no run is queued/running and every posted status is terminal.
+  # Zero statuses with completed runs means every job was skipped (no status posted).
+  if ((RUNS_PENDING == 0)) && { [[ "$STATE" == success || "$STATE" == warning ]] ||
+    ((COUNT == 0 && RUN_COUNT > 0)); }; then
+    echo "SUCCESS: All ${RUN_COUNT} workflow runs and ${COUNT} checks passed for ${SHA:0:7}." >&2
+    exit 0
+  fi
 
   # A commit with no workflows reports "pending" with zero checks forever
-  if ((COUNT == 0 && SECONDS >= GRACE)); then
+  if ((COUNT == 0 && RUN_COUNT == 0 && SECONDS >= GRACE)); then
     echo "NO CI: No checks registered for ${SHA:0:7} after ${GRACE}s." >&2
     exit 3
   fi
