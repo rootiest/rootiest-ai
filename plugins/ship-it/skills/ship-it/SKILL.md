@@ -1,7 +1,7 @@
 ---
 name: ship-it
 description: Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.
-version: 1.2.1
+version: 1.3.0
 user-invocable: true
 author: Rootiest
 ---
@@ -52,3 +52,13 @@ Execute the following phases sequentially. Do not proceed to the next phase unle
      - GitHub: `gh pr view <n> --json mergeCommit -q .mergeCommit.oid`
    - Watch it the same way as Phase 3. Exit 3 is normal here.
    - Pull any automated commits: `git switch main && git pull --ff-only origin main`
+
+5. Phase 5: Branch Cleanup. Runs right after Phase 4, only if Phase 4 ran.
+   - Act as the `/prune-it` skill: dry-run, show the plan, then run it without asking for
+     confirmation. Do not pass `--force` unless the user asked for it.
+   - This removes the merged PR's head branch, locally and on the remote, whether or not the
+     merge already deleted it, along with any other merged or orphaned branches.
+   - If the `/prune-it` skill is not installed, delete only this PR's head branch:
+     `git push origin --delete <branch>` (skip if the remote branch is already gone), then
+     `git fetch --prune` and `git branch -D <branch>`.
+   - Report what was deleted and kept as part of the final ship-it summary.

@@ -1,0 +1,6 @@
+{
+  "name": "prune-it",
+  "description": "Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.",
+  "version": "1.0.0",
+  "author": { "name": "Rootiest" }
+}
