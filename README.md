@@ -19,6 +19,7 @@ from one source tree and published as a native marketplace for both tools.
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
   - [mirror-it](#mirror-it)
+  - [prune-it](#prune-it)
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
@@ -188,6 +189,9 @@ Sequential phases — each is blocked until the previous one succeeds:
 4. **Post-Merge Sync** — only when you say the PR is merged (or ask it to
    merge): watches CI on the merge commit the same way, then fast-forwards
    local `main` to pick up any automated commits.
+5. **Branch Cleanup** — right after Post-Merge Sync: acts as `/prune-it` to
+   delete the merged PR's head branch locally and on the remote, plus any
+   other merged or orphaned branches.
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
@@ -215,6 +219,42 @@ just Fish.
 **Use when:** you say "Mirror this repository to GitHub," or invoke
 `/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
 push-mirror to itself.
+
+---
+
+### `prune-it`
+
+**Purpose:** Sweep up after merged work. A bundled bash script does the
+work, so it behaves the same in any shell and without the fish config; it
+makes the same decisions as the fish config's `git-sweep` function (the
+successor to `git-clean`).
+
+It fetches and prunes the remote, fast-forwards the local default branch,
+then deletes:
+
+- **Local branches** merged into `origin/<default>`, or whose remote branch
+  is gone and whose content is merged.
+- **Remote branches** merged into `origin/<default>`, unless they are the
+  head of an open PR.
+
+Open PRs are listed with whatever works: `gh`, `tea` or `glab`, else
+`curl` with a token from the environment (sent only to the host it belongs
+to), else anonymous `curl` for a public repository. GitHub, Gitea/Forgejo
+and GitLab are supported, self-hosted included. If nothing works, no remote
+branch is deleted; local cleanup never needs any of it.
+
+"Merged" covers merge commits, fast-forwards, rebase merges, and squash
+merges; `git branch --merged` alone misses the last two. A branch with
+unmerged commits is kept (gone local branches are deleted with `--force`;
+unmerged remote branches never are). Also kept: protected names (`main`,
+`master`, `develop`, `release/*`, …), `--keep` names, branches checked out
+in another worktree, and new branches with no commits yet. It switches off
+the current branch before deleting it, and keeps the branch instead if
+tracked files have uncommitted changes. The skill always dry-runs and shows
+the plan before deleting anything.
+
+**Use when:** you invoke `/prune-it` or `git-clean`, or ask to clean up,
+prune, or tidy branches. `/ship-it` runs it after a merge.
 
 ---
 
