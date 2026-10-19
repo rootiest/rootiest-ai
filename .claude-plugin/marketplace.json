@@ -96,6 +96,14 @@
       }
     },
     {
+      "name": "prune-it",
+      "description": "Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.",
+      "author": {
+        "name": "Rootiest"
+      },
+      "source": "./dist/claude-code/prune-it"
+    },
+    {
       "name": "readme-sync-audit",
       "description": "Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.",
       "author": {
