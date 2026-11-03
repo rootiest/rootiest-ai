@@ -12,14 +12,10 @@ from one source tree and published as a native marketplace for both tools.
 
 - [Plugins](#plugins)
   - [systematic-enumeration](#systematic-enumeration)
-  - [git-publish-workflow](#git-publish-workflow)
-  - [readme-sync-audit](#readme-sync-audit)
-  - [docs-sync-audit](#docs-sync-audit)
   - [date-time](#date-time)
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
   - [mirror-it](#mirror-it)
-  - [prune-it](#prune-it)
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
@@ -63,76 +59,6 @@ carries real cost.
 
 ---
 
-### `git-publish-workflow`
-
-**Purpose:** Automate the full lifecycle from uncommitted local work to an open
-Pull Request, with built-in quality gates.
-
-The workflow runs three phases:
-
-1. **Scope Determination** — if staged changes exist, operate only on those;
-   otherwise operate on all modified/untracked files.
-2. **Safe-Commit Sequence** — generate a `kebab-case` branch name, compose a
-   [Conventional Commits](https://www.conventionalcommits.org/) message, then
-   run the project's primary test/lint/build command. If verification fails, the
-   sequence stops — nothing is pushed.
-3. **Remote Integration** — push the branch, open a PR against the default
-   branch, and populate the description with a "Why/What" summary and a manual
-   verification checklist (`- [ ]` items).
-
-**Use when:** you say "Ship this," "Make a PR," or invoke
-`/git-publish-workflow`.
-
----
-
-### `readme-sync-audit`
-
-**Purpose:** Keep `README.md` accurate by programmatically aligning it with the
-current state of the codebase.
-
-Three-phase execution:
-
-1. **Delta Analysis** — locate the last commit that touched `README.md`, diff
-   all code changes from that point to `HEAD`, and extract undocumented
-   environment variables, CLI flags, or API changes.
-2. **Pruning & Update Audit** — remove stale setup steps or "Coming Soon" notes,
-   correct version numbers and file paths, and synthesize documentation for
-   newly discovered features.
-3. **Structural Integrity Check** — verify that Quick Start commands still work,
-   all config keys are listed, and code snippets match the current API.
-
-**Use when:** you say "Update the docs," "Sync the README," or invoke
-`/readme-sync-audit`.
-
----
-
-### `docs-sync-audit`
-
-**Purpose:** Keep documentation accurate by aligning the project's Single
-Source of Truth (SSoT) with the current state of the codebase.
-
-Unlike `readme-sync-audit`, this skill first discovers the documentation root.
-If a dedicated `docs/`, `wiki/`, or site config (e.g. `mkdocs.yml`) exists, it is
-treated as the SSoT and receives the detailed updates; the `README.md` is then
-kept as a high-level landing page that links into it. If no docs directory
-exists, it falls back to `README.md` as the SSoT.
-
-Three-phase execution:
-
-1. **Delta Analysis** — locate the last commit that touched the SSoT, diff all
-   code changes to `HEAD`, and extract undocumented environment variables, CLI
-   flags, or API changes.
-2. **Pruning & Update Audit** — route detailed changes to the correct files,
-   remove stale steps, correct versions and paths, and synthesize docs for new
-   features.
-3. **Structural Integrity Check** — verify Quick Start commands, configuration
-   keys, and usage examples still match the implementation.
-
-**Use when:** you say "Update the docs," "Sync the wiki," or invoke
-`/docs-sync-audit`.
-
----
-
 ### `date-time`
 
 **Purpose:** Retrieve the exact, real-time current date and time when a task
@@ -165,64 +91,71 @@ or want an auditable record of what changed and why.
 
 ### `ship-it`
 
-**Purpose:** Run a comprehensive pre-flight audit and publish changes to a new
-PR in a single command.
+**Purpose:** Ship pending work end to end in one command: docs sync and code
+audit, PR, CI, and after the merge, syncing `main` and cleaning up branches.
 
-Sequential phases — each is blocked until the previous one succeeds:
+`/ship-it` runs each step as its own sub-skill, in order, and stops when a step
+fails its gate. Every sub-skill can also be run on its own:
 
-1. **Documentation Sync & Code Audit** — acts as `/docs-sync-audit`: scans all
-   file changes since the last documentation edit, updates the docs/README to
-   match the current codebase, and audits code files for syntax errors or
-   regressions. **Halts the entire workflow** if any breaking issue is found.
-2. **Git Publish Workflow** — acts as `/git-publish-workflow`: creates a
-   descriptively named branch, commits all pending changes (including the
-   README updates from Phase 1), pushes to the remote, and opens a Pull Request
-   against `main`.
-3. **CI Verification** — waits on the PR head commit with a single background
-   watcher instead of sleep-polling. On GitHub it uses
-   `gh pr checks --watch --fail-fast`; on Gitea it runs the bundled
-   `scripts/tea-ci-watch.sh` (requires `tea` and `jq`), which waits until every
-   Actions run for the commit — including runs still queued, which Gitea does
-   not yet report as commit statuses — has completed and the combined commit
-   status is no longer pending. Fails fast on the first failed or cancelled
-   check. Then reports the PR link and CI result and stops; you merge.
-4. **Post-Merge Sync** — only when you say the PR is merged (or ask it to
-   merge): watches CI on the merge commit the same way, then fast-forwards
-   local `main` to pick up any automated commits.
-5. **Branch Cleanup** — right after Post-Merge Sync: acts as `/prune-it` to
-   delete the merged PR's head branch locally and on the remote, plus any
-   other merged or orphaned branches.
+| Phase | Sub-skill | What it does |
+|-------|-----------|--------------|
+| 1 | `/ship-it:doc-it` | Syncs the docs with the code, then audits the changed code. **Halts the whole workflow** on any breaking issue. |
+| 2 | `/ship-it:push-it` | Branches, commits, tests, pushes, and opens the PR. |
+| 3 | `/ship-it:verify-it` | Waits for CI on the PR head, then reports the PR link and stops; you merge. |
+| 4 | `/ship-it:sync-it` | Only once you say the PR is merged (or ask it to merge): watches CI on the merge commit and fast-forwards local `main`. |
+| 5 | `/ship-it:prune-it` | Right after Phase 4: deletes the merged branch and any other merged or orphaned branches. |
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
----
+#### `doc-it`
 
-### `mirror-it`
+Keeps the project's documentation accurate. It first finds the docs root: a
+dedicated `docs/`, `wiki/`, or site config (e.g. `mkdocs.yml`) becomes the
+Single Source of Truth (SSoT) and gets the detailed updates, with `README.md`
+kept as a landing page that links into it. Without one, `README.md` is the
+SSoT.
 
-**Purpose:** Register a Gitea push mirror so a repository's commits are
-automatically forwarded to a corresponding GitHub repository.
+1. **Delta Analysis** — find the last commit that touched the SSoT, diff all
+   code changes to `HEAD`, and extract undocumented environment variables, CLI
+   flags, or API changes.
+2. **Pruning & Update Audit** — route detailed changes to the right files,
+   remove stale steps, correct versions and paths, and document new features.
+3. **Structural Integrity Check** — verify Quick Start commands, configuration
+   keys, and usage examples still match the implementation.
+4. **Code Audit** — check the changed code for syntax errors and regressions,
+   and stop if anything is breaking.
 
-Before registering the mirror, checks whether the GitHub target repository
-exists and creates it if missing (via `gh`, a GitHub MCP server, or the REST
-API directly — whichever is available), since GitHub won't auto-create it on
-first push the way Gitea does; if none of those are available it warns the
-user to create it manually instead of blocking. Uses `tea api` against
-Gitea's `push_mirrors` endpoint, with credentials passed as
-`remote_username`/`remote_password` fields — never embedded in the mirror
-URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are
-overridable per request, as is the destination repository name.
-`GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a
-repo-root `.env` file. All shell snippets are POSIX-compatible so the skill
-works under bash, zsh, or any shell the agent's tool happens to invoke — not
-just Fish.
+#### `push-it`
 
-**Use when:** you say "Mirror this repository to GitHub," or invoke
-`/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
-push-mirror to itself.
+Takes uncommitted local work to an open Pull Request:
 
----
+1. **Scope** — if staged changes exist, use only those; otherwise all
+   modified/untracked files. On `main` the PR targets `main`; on a feature
+   branch it stacks a new PR on top of that branch.
+2. **Safe-Commit** — create a `kebab-case` branch, write a
+   [Conventional Commits](https://www.conventionalcommits.org/) message, and
+   run the project's test/lint/build command. If that fails, nothing is pushed.
+3. **Remote** — push and open the PR with a "Why/What" summary and a manual
+   verification checklist.
 
-### `prune-it`
+#### `verify-it`
+
+Waits on a commit with a single background watcher instead of sleep-polling.
+On GitHub it uses `gh pr checks --watch --fail-fast` for a PR head, or
+`gh run watch` for a merge commit. On Gitea it runs the bundled
+`scripts/tea-ci-watch.sh` (requires `tea` and `jq`), which waits until every
+Actions run for the commit — including runs still queued, which Gitea does
+not yet report as commit statuses — has completed and the combined commit
+status is no longer pending. It fails fast on the first failed or cancelled
+check; a commit with no CI is reported, not treated as a failure.
+
+#### `sync-it`
+
+Gets the merge commit from the PR (not from `origin/main`), watches its CI with
+`verify-it`, then runs `git pull --ff-only` on `main` to pick up any automated
+post-merge commits. It never merges or rebases local `main` itself.
+
+#### `prune-it`
 
 **Purpose:** Sweep up after merged work. A bundled bash script does the
 work, so it behaves the same in any shell and without the fish config; it
@@ -253,8 +186,33 @@ the current branch before deleting it, and keeps the branch instead if
 tracked files have uncommitted changes. The skill always dry-runs and shows
 the plan before deleting anything.
 
-**Use when:** you invoke `/prune-it` or `git-clean`, or ask to clean up,
-prune, or tidy branches. `/ship-it` runs it after a merge.
+**Use when:** you invoke `/ship-it:prune-it` or `git-clean`, or ask to clean
+up, prune, or tidy branches. `/ship-it` runs it after a merge.
+
+---
+
+### `mirror-it`
+
+**Purpose:** Register a Gitea push mirror so a repository's commits are
+automatically forwarded to a corresponding GitHub repository.
+
+Before registering the mirror, checks whether the GitHub target repository
+exists and creates it if missing (via `gh`, a GitHub MCP server, or the REST
+API directly — whichever is available), since GitHub won't auto-create it on
+first push the way Gitea does; if none of those are available it warns the
+user to create it manually instead of blocking. Uses `tea api` against
+Gitea's `push_mirrors` endpoint, with credentials passed as
+`remote_username`/`remote_password` fields — never embedded in the mirror
+URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are
+overridable per request, as is the destination repository name.
+`GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a
+repo-root `.env` file. All shell snippets are POSIX-compatible so the skill
+works under bash, zsh, or any shell the agent's tool happens to invoke — not
+just Fish.
+
+**Use when:** you say "Mirror this repository to GitHub," or invoke
+`/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
+push-mirror to itself.
 
 ---
 
@@ -340,7 +298,7 @@ From inside a Claude Code session:
 
 ```
 /plugin marketplace add rootiest/rootiest-ai
-/plugin install git-publish-workflow@rootiest-ai
+/plugin install ship-it@rootiest-ai
 ```
 
 Or from a regular shell, before starting a session:
