@@ -1,12 +1,14 @@
 ---
 name: prune-it
 description: Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.
-version: 1.0.0
+version: 2.0.0
 user-invocable: true
 author: Rootiest
 ---
 
-# /prune-it
+# /ship-it:prune-it
+
+Phase 5 of `/ship-it`. Also runs on its own.
 
 ## Objective
 Sweep up after merged work: fetch and prune the remote, fast-forward the default branch, and
@@ -16,11 +18,11 @@ result is the same whatever shell or config the user runs.
 
 ## Trigger Conditions
 Activate this skill when one of the following is met:
-1. The user types `/prune-it`.
+1. The user types `/ship-it:prune-it` or `/prune-it`.
 2. The user asks to run `git-clean` (the Rootiest fish function this skill replaces), or to clean
    up, prune, tidy, or sweep up branches, e.g. "delete merged branches", "clean up stale
    branches", "get rid of old branches", "tidy up the repo after the merge".
-3. `/ship-it` reaches its cleanup phase (Phase 5).
+3. `/ship-it` reaches Phase 5.
 4. A PR you merged, or the user says was merged, leaves its head branch behind, locally or on
    the remote.
 

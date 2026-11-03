@@ -34,22 +34,6 @@
       "source": "./dist/claude-code/date-time"
     },
     {
-      "name": "docs-sync-audit",
-      "description": "Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.",
-      "author": {
-        "name": "Rootiest"
-      },
-      "source": "./dist/claude-code/docs-sync-audit"
-    },
-    {
-      "name": "git-publish-workflow",
-      "description": "Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.",
-      "author": {
-        "name": "Rootiest"
-      },
-      "source": "./dist/claude-code/git-publish-workflow"
-    },
-    {
       "name": "gitea-mcp",
       "description": "Connects Claude Code/agy to a Gitea instance via the official gitea-mcp server, authenticated with GITEA_HOST/GITEA_ACCESS_TOKEN you set locally.",
       "author": {
@@ -96,24 +80,8 @@
       }
     },
     {
-      "name": "prune-it",
-      "description": "Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.",
-      "author": {
-        "name": "Rootiest"
-      },
-      "source": "./dist/claude-code/prune-it"
-    },
-    {
-      "name": "readme-sync-audit",
-      "description": "Analyzes repository delta since the last documentation update and synchronizes the README.md with the current codebase state.",
-      "author": {
-        "name": "Rootiest"
-      },
-      "source": "./dist/claude-code/readme-sync-audit"
-    },
-    {
       "name": "ship-it",
-      "description": "Runs a comprehensive pre-flight audit, syncs the README, and publishes the changes to a new PR.",
+      "description": "Ships work end to end: docs sync and code audit, PR, CI, post-merge sync and branch cleanup. Each step is also its own skill (doc-it, push-it, verify-it, sync-it, prune-it).",
       "author": {
         "name": "Rootiest"
       },
