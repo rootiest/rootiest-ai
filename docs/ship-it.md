@@ -16,6 +16,11 @@ name; anything left out uses that step's defaults.
 - One workflow on PRs: `Generate plugin manifests` runs the `--check` validation. It takes about
   a minute.
 
+## merge-it
+- Merge method: merge commit.
+- Between merges, wait for the `chore(plugins): regenerate plugin manifests` commit (see
+  `sync-it`) before merging the next PR.
+
 ## sync-it
 - After a merge that touches `plugins/`, `scripts/` or `manifest.yaml`, CI pushes a
   `chore(plugins): regenerate plugin manifests` commit to `main`. Wait for the merge commit's CI
