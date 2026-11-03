@@ -41,3 +41,13 @@ Rules for the whole run.
 
 ## prune-it
 - Branches to keep beyond the defaults (`--keep` names).
+
+## deploy-it
+- "Nothing to deploy." if that is the case, so the step doesn't go looking.
+- Environments and the default one, e.g. staging and production.
+- Commands, in order, and where they run (locally, over ssh to a host, or "CI deploys on merge
+  to `main`").
+- How to verify, e.g. a health-check URL or `docker compose ps`.
+- How to roll back, and whether to do it without asking.
+- When to deploy without asking, e.g. "Deploy to staging without approval; production needs
+  approval." Anything not covered here asks first.

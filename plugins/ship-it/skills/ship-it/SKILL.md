@@ -1,7 +1,7 @@
 ---
 name: ship-it
-description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, merges with approval, then syncs main and prunes merged branches.
-version: 2.2.0
+description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, merges with approval, syncs main, prunes merged branches, and deploys.
+version: 2.3.0
 user-invocable: true
 author: Rootiest
 ---
@@ -45,6 +45,7 @@ exists:
 | 4a. Merge | `/ship-it:merge-it` | The PR merged. It asks for approval unless the project's rules allow merging without it. If the user declines, report the PR link and STOP. |
 | 4b. Post-merge sync | `/ship-it:sync-it` | Runs after 4a merged the PR, or when the user later says they merged it. |
 | 5. Branch cleanup | `/ship-it:prune-it` | Runs right after Phase 4b, only if 4b ran. |
+| 6. Deploy | `/ship-it:deploy-it` | Runs after Phase 5, whatever its result, only if 4b ran. It asks for approval unless the project's rules allow deploying without it. "Nothing to deploy" and a declined deploy both end the run successfully. |
 
 ## Phase notes
 - **Phase 4a:** hand `merge-it` the PR number and the head commit Phase 3 already watched, so it
@@ -55,14 +56,16 @@ exists:
   `--force` unless the user asked for it. This removes the merged PR's head branch, locally and on
   the remote, whether or not the merge already deleted it, along with any other merged or
   orphaned branches.
+- **Phase 6:** a failed deploy is reported as the run's result; don't retry or roll back unless
+  the project's `## deploy-it` section says to.
 - **Fallback:** if a sub-skill is unavailable, do its job inline from its description. For Phase 5
   that means deleting only this PR's head branch: `git push origin --delete <branch>` (skip if the
   remote branch is already gone), then `git fetch --prune` and `git branch -D <branch>`.
 
 ## Final report
 One summary covering every phase that ran: docs changes, the PR link, CI results (PR head and
-merge commit), the merge and any approval rule applied, commits pulled into `main`, and branches
-deleted and kept. Name the project
+merge commit), the merge and any approval rule applied, commits pulled into `main`, branches
+deleted and kept, and the deploy result (or that there was nothing to deploy). Name the project
 instructions file used, or say there was none.
 
 If there was none and a step had to work out something project-specific (which checks to run,
