@@ -25,3 +25,7 @@ name; anything left out uses that step's defaults.
 - After a merge that touches `plugins/`, `scripts/` or `manifest.yaml`, CI pushes a
   `chore(plugins): regenerate plugin manifests` commit to `main`. Wait for the merge commit's CI
   to finish before pulling, so local `main` picks that commit up.
+
+## deploy-it
+- Nothing to deploy. The marketplace is served straight from this repo, so the regenerate commit
+  on `main` is the release.
