@@ -107,6 +107,22 @@ fails its gate. Every sub-skill can also be run on its own:
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
+#### Project instructions
+
+A project can tell each step how it ships, so the agent doesn't have to work
+it out each run. Steps look for the first of these files:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+Each `##` section is read by the step of the same name (`## push-it`,
+`## verify-it`, …), and `## ship-it` holds rules for the whole run. A section
+overrides that step's defaults; anything left out keeps them. Commit
+`docs/ship-it.md` to share the rules, or use `AGENTS_ship-it.md` to keep them
+local; when both exist, `AGENTS_ship-it.md` is used. The bundled
+`skills/ship-it/templates/ship-it.md` lists every section.
+
 #### `doc-it`
 
 Keeps the project's documentation accurate. It first finds the docs root: a
