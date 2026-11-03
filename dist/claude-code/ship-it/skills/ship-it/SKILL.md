@@ -1,7 +1,7 @@
 ---
 name: ship-it
 description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, then after the merge syncs main and prunes merged branches.
-version: 2.0.0
+version: 2.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -18,6 +18,22 @@ from the `rootiest-ai-all` bundle, the same skills sit under that prefix instead
 
 Pass along what earlier phases produced (PR number, branch, commit SHAs) so the sub-skills don't
 have to rediscover it.
+
+## Project instructions
+Before Phase 1, look for the project's ship-it instructions once and use the first file that
+exists:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+- The `## ship-it` section holds rules for the whole run (e.g. phases to skip). Follow it.
+- Each other `## <sub-skill>` section belongs to that step. Hand it to the sub-skill when you
+  invoke it, so it doesn't search again. Where a section conflicts with a sub-skill's defaults,
+  the section wins.
+- No file means every step uses its defaults.
+
+`templates/ship-it.md` in this skill's directory is a starting point listing every section.
 
 | Phase | Sub-skill | Gate to continue |
 |-------|-----------|------------------|
@@ -39,4 +55,10 @@ have to rediscover it.
 
 ## Final report
 One summary covering every phase that ran: docs changes, the PR link, CI results (PR head and
-merge commit), commits pulled into `main`, and branches deleted and kept.
+merge commit), commits pulled into `main`, and branches deleted and kept. Name the project
+instructions file used, or say there was none.
+
+If there was none and a step had to work out something project-specific (which checks to run,
+where the docs live, an expected automated commit), offer to save what you learned to
+`docs/ship-it.md`, starting from `templates/ship-it.md`, so the next run doesn't have to work
+it out again. Only offer; don't write it unasked.

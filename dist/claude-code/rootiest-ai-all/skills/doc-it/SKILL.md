@@ -1,7 +1,7 @@
 ---
 name: doc-it
 description: Syncs the project's documentation (docs/, wiki, or README) with the code changed since the last docs update, and audits the changed code for errors before it ships.
-version: 2.0.0
+version: 2.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -9,6 +9,19 @@ author: Rootiest
 # /ship-it:doc-it
 
 Phase 1 of `/ship-it`. Also runs on its own.
+
+## Project instructions
+Projects can spell out how this step runs for them. Unless `/ship-it` already handed you this
+step's section, look for the project's ship-it instructions and use the first file that exists:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+Read only the `## doc-it` section. Where it conflicts with the defaults in this skill, the
+section wins; anything it leaves out falls back to the defaults. No file, or no `## doc-it`
+section, means use the defaults. Say in your report which file and section you used, or that
+there were none.
 
 ## **Objective**
 To ensure project documentation accurately reflects the current state of the codebase by identifying the "Single Source of Truth" (SSoT) (e.g., a `docs/` directory or wiki) and prioritizing updates there. The `README.md` is updated concurrently only for high-level changes or if it serves as the SSoT.

@@ -1,7 +1,7 @@
 ---
 name: push-it
 description: Branches, commits (Conventional Commits), tests, pushes, and opens a PR for uncommitted or staged work. Handles both independent and stacked PRs.
-version: 2.0.0
+version: 2.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -9,6 +9,19 @@ author: Rootiest
 # /ship-it:push-it
 
 Phase 2 of `/ship-it`. Also runs on its own.
+
+## Project instructions
+Projects can spell out how this step runs for them. Unless `/ship-it` already handed you this
+step's section, look for the project's ship-it instructions and use the first file that exists:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+Read only the `## push-it` section. Where it conflicts with the defaults in this skill, the
+section wins; anything it leaves out falls back to the defaults. No file, or no `## push-it`
+section, means use the defaults. Say in your report which file and section you used, or that
+there were none.
 
 ## **Objective**
 To provide a hands-off, end-to-end automation for moving local changes into a formal Pull Request, ensuring code quality through automated and manual verification steps, while intelligently routing Stacked PRs.
