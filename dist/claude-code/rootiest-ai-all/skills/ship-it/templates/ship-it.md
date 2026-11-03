@@ -27,6 +27,14 @@ Rules for the whole run.
 - How long CI normally takes.
 - "This project has no CI" if that is expected.
 
+## merge-it
+- Merge method: merge commit, squash, or rebase.
+- When to merge without asking, e.g. "If the PR only changes `docs/` or `*.md`, merge without
+  approval." or "Merge without approval unless the PR touches `src/core/`." Anything not covered
+  here asks first.
+- Whether stacked branches may be force-pushed after a squash/rebase merge without asking.
+- Order for independent PRs, if not by PR number.
+
 ## sync-it
 - Automated commits to expect after a merge, e.g. "CI pushes regenerated `dist/`."
 - Steps to run after pulling, e.g. submodule update, regenerate lockfiles.

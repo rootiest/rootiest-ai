@@ -1,7 +1,7 @@
 ---
 name: prune-it
 description: Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.
-version: 2.1.0
+version: 2.2.0
 user-invocable: true
 author: Rootiest
 ---

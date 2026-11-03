@@ -1,7 +1,7 @@
 ---
 name: ship-it
-description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, then after the merge syncs main and prunes merged branches.
-version: 2.1.0
+description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, merges with approval, then syncs main and prunes merged branches.
+version: 2.2.0
 user-invocable: true
 author: Rootiest
 ---
@@ -35,16 +35,22 @@ exists:
 
 `templates/ship-it.md` in this skill's directory is a starting point listing every section.
 
+## Phases
+
 | Phase | Sub-skill | Gate to continue |
 |-------|-----------|------------------|
 | 1. Docs sync & code audit | `/ship-it:doc-it` | No breaking code issues found. If any are, HALT and report; publish nothing. |
 | 2. Publish | `/ship-it:push-it` | Branch pushed and PR opened (includes the Phase 1 docs changes). |
 | 3. CI | `/ship-it:verify-it` on the PR head commit | Pass, or no CI registered. On failure or a repeated timeout, report and stop. |
-| — | Stop | Report the PR link and CI result, then STOP. The user merges. |
-| 4. Post-merge sync | `/ship-it:sync-it` | Runs ONLY when the user says the PR is merged, or explicitly asks you to merge it (merge it, then continue). |
-| 5. Branch cleanup | `/ship-it:prune-it` | Runs right after Phase 4, only if Phase 4 ran. |
+| 4a. Merge | `/ship-it:merge-it` | The PR merged. It asks for approval unless the project's rules allow merging without it. If the user declines, report the PR link and STOP. |
+| 4b. Post-merge sync | `/ship-it:sync-it` | Runs after 4a merged the PR, or when the user later says they merged it. |
+| 5. Branch cleanup | `/ship-it:prune-it` | Runs right after Phase 4b, only if 4b ran. |
 
 ## Phase notes
+- **Phase 4a:** hand `merge-it` the PR number and the head commit Phase 3 already watched, so it
+  doesn't watch CI again. When the user stops at 4a and later says the PR is merged (or asks you
+  to merge it), continue from there.
+- **Phase 4b:** hand `sync-it` the merge commit, and its CI result if `merge-it` watched it.
 - **Phase 5:** dry-run, show the plan, then run it without asking for confirmation. Do not pass
   `--force` unless the user asked for it. This removes the merged PR's head branch, locally and on
   the remote, whether or not the merge already deleted it, along with any other merged or
@@ -55,7 +61,8 @@ exists:
 
 ## Final report
 One summary covering every phase that ran: docs changes, the PR link, CI results (PR head and
-merge commit), commits pulled into `main`, and branches deleted and kept. Name the project
+merge commit), the merge and any approval rule applied, commits pulled into `main`, and branches
+deleted and kept. Name the project
 instructions file used, or say there was none.
 
 If there was none and a step had to work out something project-specific (which checks to run,

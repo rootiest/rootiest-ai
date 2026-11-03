@@ -81,7 +81,7 @@
     },
     {
       "name": "ship-it",
-      "description": "Ships work end to end: docs sync and code audit, PR, CI, post-merge sync and branch cleanup. Each step is also its own skill (doc-it, push-it, verify-it, sync-it, prune-it).",
+      "description": "Ships work end to end: docs sync and code audit, PR, CI, merge, post-merge sync and branch cleanup. Each step is also its own skill (doc-it, push-it, verify-it, merge-it, sync-it, prune-it).",
       "author": {
         "name": "Rootiest"
       },

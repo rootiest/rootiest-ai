@@ -1,7 +1,7 @@
 ---
 name: doc-it
 description: Syncs the project's documentation (docs/, wiki, or README) with the code changed since the last docs update, and audits the changed code for errors before it ships.
-version: 2.1.0
+version: 2.2.0
 user-invocable: true
 author: Rootiest
 ---
