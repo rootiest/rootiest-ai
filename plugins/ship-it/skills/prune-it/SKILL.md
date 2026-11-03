@@ -1,7 +1,7 @@
 ---
 name: prune-it
 description: Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.
-version: 2.0.0
+version: 2.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -9,6 +9,19 @@ author: Rootiest
 # /ship-it:prune-it
 
 Phase 5 of `/ship-it`. Also runs on its own.
+
+## Project instructions
+Projects can spell out how this step runs for them. Unless `/ship-it` already handed you this
+step's section, look for the project's ship-it instructions and use the first file that exists:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+Read only the `## prune-it` section. Where it conflicts with the defaults in this skill, the
+section wins; anything it leaves out falls back to the defaults. No file, or no `## prune-it`
+section, means use the defaults. Say in your report which file and section you used, or that
+there were none.
 
 ## Objective
 Sweep up after merged work: fetch and prune the remote, fast-forward the default branch, and

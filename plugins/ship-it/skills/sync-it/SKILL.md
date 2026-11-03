@@ -1,7 +1,7 @@
 ---
 name: sync-it
 description: After a PR merges, waits for CI on the merge commit and fast-forwards local main, pulling in any automated post-merge commits.
-version: 2.0.0
+version: 2.1.0
 user-invocable: true
 author: Rootiest
 ---
@@ -9,6 +9,19 @@ author: Rootiest
 # /ship-it:sync-it
 
 Phase 4 of `/ship-it`. Also runs on its own.
+
+## Project instructions
+Projects can spell out how this step runs for them. Unless `/ship-it` already handed you this
+step's section, look for the project's ship-it instructions and use the first file that exists:
+
+1. `AGENTS_ship-it.md` in the repo root
+2. `AGENTS/AGENTS_ship-it.md`
+3. `docs/ship-it.md`
+
+Read only the `## sync-it` section. Where it conflicts with the defaults in this skill, the
+section wins; anything it leaves out falls back to the defaults. No file, or no `## sync-it`
+section, means use the defaults. Say in your report which file and section you used, or that
+there were none.
 
 ## Trigger Conditions
 1. The user types `/ship-it:sync-it`, or asks to bring local `main` up to date after a merge.
