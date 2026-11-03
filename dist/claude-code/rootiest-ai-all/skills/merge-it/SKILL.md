@@ -1,7 +1,7 @@
 ---
 name: merge-it
 description: Merges one PR or a set of PRs in the right order (stacks bottom-up), after checking CI and reviews, with user approval unless the project's rules allow merging without it. Waits for post-merge automated commits between merges.
-version: 2.2.0
+version: 2.3.0
 user-invocable: true
 author: Rootiest
 ---
