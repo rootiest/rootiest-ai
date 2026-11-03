@@ -92,7 +92,7 @@ or want an auditable record of what changed and why.
 ### `ship-it`
 
 **Purpose:** Ship pending work end to end in one command: docs sync and code
-audit, PR, CI, merge, then syncing `main` and cleaning up branches.
+audit, PR, CI, merge, syncing `main`, cleaning up branches, and deploying.
 
 `/ship-it` runs each step as its own sub-skill, in order, and stops when a step
 fails its gate. Every sub-skill can also be run on its own:
@@ -105,6 +105,7 @@ fails its gate. Every sub-skill can also be run on its own:
 | 4a | `/ship-it:merge-it` | Merges the PR once you approve, or without asking when the project's rules allow it. Decline and it stops with the PR link. |
 | 4b | `/ship-it:sync-it` | After the merge (or once you say you merged it yourself): watches CI on the merge commit and fast-forwards local `main`. |
 | 5 | `/ship-it:prune-it` | Right after Phase 4b: deletes the merged branch and any other merged or orphaned branches. |
+| 6 | `/ship-it:deploy-it` | Deploys `main` with the project's deploy steps, once you approve or when the project's rules allow it. A project with nothing to deploy just reports that. |
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
@@ -223,6 +224,29 @@ the plan before deleting anything.
 
 **Use when:** you invoke `/ship-it:prune-it` or `git-clean`, or ask to clean
 up, prune, or tidy branches. `/ship-it` runs it after a merge.
+
+#### `deploy-it`
+
+Deploys what is on the default branch, after checking local `main` matches
+the remote and has no uncommitted changes. The project's `## deploy-it`
+section is the source of truth: commands, environments, verification,
+rollback, and when no approval is needed (e.g. "staging without asking,
+production needs approval").
+
+Without a section it works out the plan from the repo: a CI workflow that
+deploys on merge, a `deploy` target or script, or container and hosting
+config. A plan it worked out is always shown and approved before anything
+runs, and afterwards it offers to save it to `docs/ship-it.md`. When the
+deploy happens in CI, it watches that run instead of deploying by hand. If
+nothing turns up, it reports "no deploy configured" and `/ship-it` still
+succeeds.
+
+After deploying it verifies (health-check URL, service status, or the CI job)
+and reports. On failure it stops; it rolls back only if the project says how,
+and asks first unless told to roll back automatically.
+
+**Use when:** you invoke `/ship-it:deploy-it` or ask to deploy, release, or
+roll out the project. `/ship-it` runs it last, after branch cleanup.
 
 ---
 
