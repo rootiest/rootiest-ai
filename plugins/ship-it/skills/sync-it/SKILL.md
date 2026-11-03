@@ -1,14 +1,14 @@
 ---
 name: sync-it
 description: After a PR merges, waits for CI on the merge commit and fast-forwards local main, pulling in any automated post-merge commits.
-version: 2.1.0
+version: 2.2.0
 user-invocable: true
 author: Rootiest
 ---
 
 # /ship-it:sync-it
 
-Phase 4 of `/ship-it`. Also runs on its own.
+Phase 4b of `/ship-it`, after `/ship-it:merge-it`. Also runs on its own.
 
 ## Project instructions
 Projects can spell out how this step runs for them. Unless `/ship-it` already handed you this
@@ -25,11 +25,11 @@ there were none.
 
 ## Trigger Conditions
 1. The user types `/ship-it:sync-it`, or asks to bring local `main` up to date after a merge.
-2. `/ship-it` reaches Phase 4: the user says the PR is merged, or asked you to merge it and the
-   merge succeeded.
+2. `/ship-it` reaches Phase 4b: `/ship-it:merge-it` merged the PR, or the user says they merged
+   it.
 
 ## Inputs
-- **PR number**: given by the caller. Run standalone, use the most recently merged PR whose head
+- **PR number and merge commit**: given by the caller. Run standalone, use the most recently merged PR whose head
   is the current branch; if that is ambiguous, ask.
 - `<owner>/<repo>` and the platform come from `git remote get-url origin`.
 
@@ -38,7 +38,8 @@ there were none.
    - Gitea: `tea api "/repos/<owner>/<repo>/pulls/<n>" | jq -r .merge_commit_sha`
    - GitHub: `gh pr view <n> --json mergeCommit -q .mergeCommit.oid`
    If the PR is not merged, report that and stop.
-2. Watch CI on that commit with `/ship-it:verify-it`, passing the merge commit SHA. "No CI" is
+2. Watch CI on that commit with `/ship-it:verify-it`, passing the merge commit SHA. Skip this
+   when the caller already watched this merge commit and handed you the result. "No CI" is
    normal here. A failure is reported, and sync still continues: the merge already happened.
 3. Pull any automated commits (e.g. generated files pushed by CI after the merge):
    ```bash
