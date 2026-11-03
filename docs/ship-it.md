@@ -27,5 +27,17 @@ name; anything left out uses that step's defaults.
   to finish before pulling, so local `main` picks that commit up.
 
 ## deploy-it
-- Nothing to deploy. The marketplace is served straight from this repo, so the regenerate commit
-  on `main` is the release.
+Deploying means refreshing the local install of the marketplace, after `sync-it` has pulled the
+regenerate commit into `main`. It only changes this machine.
+
+1. Check where `rootiest-ai` comes from: `claude plugin marketplace list`.
+   - **A local folder** (`~/.claude/plugins/marketplaces/rootiest-ai-private`): it is a private
+     overlay build, which a plain update would only re-read unchanged. Deploy from the overlay
+     repo instead, following its own `## deploy-it`; it rebuilds on top of this repo's `main`.
+     Stop here.
+   - **This repo** (GitHub or Gitea): continue.
+2. `claude plugin marketplace update rootiest-ai`
+3. Verify: `claude plugin list` shows each installed `@rootiest-ai` plugin at the version in its
+   `plugins/<plugin>/plugin.json`. Update any that lag with
+   `claude plugin update <plugin>@rootiest-ai`. List installed plugins that the marketplace no
+   longer has and ask before uninstalling them.
