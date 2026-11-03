@@ -1,12 +1,14 @@
 ---
-name: docs-sync-audit
-description: Analyzes repository delta since the last documentation update and synchronizes the Single Source of Truth (docs/, wiki, or README) with the current codebase state.
-version: 1.3.0
+name: doc-it
+description: Syncs the project's documentation (docs/, wiki, or README) with the code changed since the last docs update, and audits the changed code for errors before it ships.
+version: 2.0.0
 user-invocable: true
 author: Rootiest
 ---
 
-# Documentation Synchronization & Audit Skill
+# /ship-it:doc-it
+
+Phase 1 of `/ship-it`. Also runs on its own.
 
 ## **Objective**
 To ensure project documentation accurately reflects the current state of the codebase by identifying the "Single Source of Truth" (SSoT) (e.g., a `docs/` directory or wiki) and prioritizing updates there. The `README.md` is updated concurrently only for high-level changes or if it serves as the SSoT.
@@ -36,6 +38,10 @@ Ensure the updated SSoT (and README, if applicable) includes or updates these cr
 2. **Configuration**: Are all current `.env` or config keys listed?
 3. **Usage Examples**: Do the provided code snippets actually compile/run with the current API?
 
+### **Phase 4: Code Audit**
+1. Audit the code files changed in the Phase 1 delta, plus any uncommitted changes, for syntax errors, regressions, and other breaking issues.
+2. **Halt on errors**: if anything breaking is found, stop and report it. When running under `/ship-it`, this stops the whole workflow before anything is published.
+
 ## **Constraints & Rules**
 * **Hierarchy Enforcement**: Never duplicate deep technical documentation in the README if a `docs/` folder exists. Use the README as a high-level landing page that points to the SSoT.
 * **Minimalism**: Maintain the existing tone of the documentation. Do not add "fluff" or marketing language unless the original document uses it.
@@ -43,6 +49,7 @@ Ensure the updated SSoT (and README, if applicable) includes or updates these cr
 * **Markdown Standards**: Use standard GFM (GitHub Flavored Markdown) or MDX if applicable to the SSoT. Ensure all code blocks have the correct language identifier for syntax highlighting.
 
 ## **Trigger Scenarios**
-* **Direct Command:** The user invokes `/docs-sync-audit`, `/readme-sync-audit`, or `/update-docs`.
+* **Direct Command:** The user invokes `/ship-it:doc-it` or `/update-docs`.
+* **Workflow:** `/ship-it` reaches Phase 1.
 * **Natural Language:** User says "Update the docs", "Sync the wiki", or "Sync the README with my recent changes."
 * **Contextual Suggestion:** Trigger automatically if the model detects significant changes to public APIs, CLI arguments, or environment variables without a corresponding documentation update.

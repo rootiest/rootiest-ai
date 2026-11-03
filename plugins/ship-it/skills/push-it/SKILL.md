@@ -1,12 +1,14 @@
 ---
-name: git-publish-workflow
-description: Automates branching, conventional commits, testing, and PR creation for uncommitted or staged work. Handles both independent and stacked PRs.
-version: 1.2.0
+name: push-it
+description: Branches, commits (Conventional Commits), tests, pushes, and opens a PR for uncommitted or staged work. Handles both independent and stacked PRs.
+version: 2.0.0
 user-invocable: true
 author: Rootiest
 ---
 
-# Git Publish & PR Workflow
+# /ship-it:push-it
+
+Phase 2 of `/ship-it`. Also runs on its own.
 
 ## **Objective**
 To provide a hands-off, end-to-end automation for moving local changes into a formal Pull Request, ensuring code quality through automated and manual verification steps, while intelligently routing Stacked PRs.
@@ -44,6 +46,6 @@ Before execution, check the local git state:
 * **Clean State**: Ensure the workflow ends with the user on the new branch, not the original branch.
 
 ## **Trigger Scenarios**
-* User says: "Ship this."
-* User says: "Make a PR for my current changes."
-* Invoked via `/git-publish-workflow`.
+* User says: "Make a PR for my current changes" or "push this up".
+* Invoked via `/ship-it:push-it`.
+* `/ship-it` reaches Phase 2. ("Ship this" means the full `/ship-it` workflow, not this step alone.)
