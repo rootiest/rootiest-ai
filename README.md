@@ -92,7 +92,7 @@ or want an auditable record of what changed and why.
 ### `ship-it`
 
 **Purpose:** Ship pending work end to end in one command: docs sync and code
-audit, PR, CI, and after the merge, syncing `main` and cleaning up branches.
+audit, PR, CI, merge, then syncing `main` and cleaning up branches.
 
 `/ship-it` runs each step as its own sub-skill, in order, and stops when a step
 fails its gate. Every sub-skill can also be run on its own:
@@ -101,9 +101,10 @@ fails its gate. Every sub-skill can also be run on its own:
 |-------|-----------|--------------|
 | 1 | `/ship-it:doc-it` | Syncs the docs with the code, then audits the changed code. **Halts the whole workflow** on any breaking issue. |
 | 2 | `/ship-it:push-it` | Branches, commits, tests, pushes, and opens the PR. |
-| 3 | `/ship-it:verify-it` | Waits for CI on the PR head, then reports the PR link and stops; you merge. |
-| 4 | `/ship-it:sync-it` | Only once you say the PR is merged (or ask it to merge): watches CI on the merge commit and fast-forwards local `main`. |
-| 5 | `/ship-it:prune-it` | Right after Phase 4: deletes the merged branch and any other merged or orphaned branches. |
+| 3 | `/ship-it:verify-it` | Waits for CI on the PR head. |
+| 4a | `/ship-it:merge-it` | Merges the PR once you approve, or without asking when the project's rules allow it. Decline and it stops with the PR link. |
+| 4b | `/ship-it:sync-it` | After the merge (or once you say you merged it yourself): watches CI on the merge commit and fast-forwards local `main`. |
+| 5 | `/ship-it:prune-it` | Right after Phase 4b: deletes the merged branch and any other merged or orphaned branches. |
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
@@ -164,6 +165,24 @@ Actions run for the commit — including runs still queued, which Gitea does
 not yet report as commit statuses — has completed and the combined commit
 status is no longer pending. It fails fast on the first failed or cancelled
 check; a commit with no CI is reported, not treated as a failure.
+
+#### `merge-it`
+
+Merges one PR or several, one at a time. Stacked PRs (a PR based on another
+open PR's branch) merge bottom-up; independent ones by PR number. Before each
+merge it checks the PR is open and mergeable, has no requested changes, and
+has green CI (via `verify-it`).
+
+It asks before merging unless you already asked it to merge those PRs, or
+the project's `## merge-it` section allows it for this PR, e.g. "merge
+without approval if the PR only touches docs." It says which rule matched.
+
+Between merges it waits for the merge commit's CI and any automated commits
+the project expects, then retargets stacked children to the new base. After a
+squash or rebase merge, the child also has to be rebased and force-pushed
+(`--force-with-lease`), which it asks about first unless the project allows it.
+It uses the project's merge method, else a merge commit, and leaves branch
+deletion to `prune-it`.
 
 #### `sync-it`
 
