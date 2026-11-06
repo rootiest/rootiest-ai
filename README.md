@@ -486,8 +486,8 @@ personal-only plugins out of a public repo's git history entirely, while
 still reusing the same plugin format and generator.
 
 ```bash
-# Layer a second, already-cloned repo on top of this one
-python3 scripts/generate_plugins.py --source . --source ~/rootiest-ai-private
+# Layer a second, already-cloned repo on top of this one (here its path is in ROOTIEST_AI_PRIVATE)
+python3 scripts/generate_plugins.py --source . --source "$ROOTIEST_AI_PRIVATE"
 
 # Or have the generator clone it (token read from an env var, never a CLI argument)
 export PRIVATE_TOKEN=...
