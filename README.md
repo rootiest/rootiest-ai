@@ -15,7 +15,6 @@ from one source tree and published as a native marketplace for both tools.
   - [date-time](#date-time)
   - [technical-devlog-scribe](#technical-devlog-scribe)
   - [ship-it](#ship-it)
-  - [mirror-it](#mirror-it)
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
@@ -247,31 +246,6 @@ and asks first unless told to roll back automatically.
 
 **Use when:** you invoke `/ship-it:deploy-it` or ask to deploy, release, or
 roll out the project. `/ship-it` runs it last, after branch cleanup.
-
----
-
-### `mirror-it`
-
-**Purpose:** Register a Gitea push mirror so a repository's commits are
-automatically forwarded to a corresponding GitHub repository.
-
-Before registering the mirror, checks whether the GitHub target repository
-exists and creates it if missing (via `gh`, a GitHub MCP server, or the REST
-API directly — whichever is available), since GitHub won't auto-create it on
-first push the way Gitea does; if none of those are available it warns the
-user to create it manually instead of blocking. Uses `tea api` against
-Gitea's `push_mirrors` endpoint, with credentials passed as
-`remote_username`/`remote_password` fields — never embedded in the mirror
-URL. Defaults to an `8h` sync interval with sync-on-commit enabled; both are
-overridable per request, as is the destination repository name.
-`GITHUB_USER`/`GITHUB_TOKEN` can come from the environment or, as a fallback, a
-repo-root `.env` file. All shell snippets are POSIX-compatible so the skill
-works under bash, zsh, or any shell the agent's tool happens to invoke — not
-just Fish.
-
-**Use when:** you say "Mirror this repository to GitHub," or invoke
-`/mirror-it`. Only relevant for repositories hosted on Gitea — GitHub can't
-push-mirror to itself.
 
 ---
 
