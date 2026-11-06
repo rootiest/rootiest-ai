@@ -1,7 +1,7 @@
 ---
 name: push-it
 description: Branches, commits (Conventional Commits), tests, pushes, and opens a PR for uncommitted or staged work. Handles both independent and stacked PRs.
-version: 2.3.0
+version: 2.4.0
 user-invocable: true
 author: Rootiest
 ---
