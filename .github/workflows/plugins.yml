@@ -3,23 +3,25 @@ name: Generate plugin manifests
 on:
   pull_request:
     paths:
+      - ".github/workflows/plugins.yml"
       - "plugins/**"
       - "manifest.yaml"
       - "scripts/**"
   push:
     branches: [main]
     paths:
+      - ".github/workflows/plugins.yml"
       - "plugins/**"
       - "manifest.yaml"
       - "scripts/**"
   workflow_dispatch: {}
 
-# Runs on Gitea only: racknerd-mini is a Gitea runner. GitHub copies of this repository see this file too;
-# the guard skips the jobs there instead of leaving them queued.
+# Runs on Gitea only. GitHub copies of this repository see this file too; the guard skips the jobs there
+# instead of running them on GitHub's own runners.
 jobs:
   validate:
     if: github.server_url != 'https://github.com' && github.event_name == 'pull_request'
-    runs-on: racknerd-mini
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,7 +32,7 @@ jobs:
 
   generate:
     if: github.server_url != 'https://github.com' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    runs-on: racknerd-mini
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
