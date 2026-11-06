@@ -18,8 +18,6 @@ from one source tree and published as a native marketplace for both tools.
   - [core-essentials](#core-essentials)
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
-  - [caveman](#caveman)
-  - [ponytail](#ponytail)
   - [mattpocock-skills](#mattpocock-skills)
 - [Installation](#installation)
   - [Claude Code](#claude-code)
@@ -288,41 +286,18 @@ both, or neither independently.
 
 ---
 
-### `caveman`
-
-**Purpose:** Ultra-compressed communication mode — cuts output tokens while
-keeping full technical accuracy.
-
-This is a third-party plugin from
-[JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman), not
-maintained in this repo. Our marketplace entry points straight at that
-repo's own `.claude-plugin/plugin.json` (via `source: {"source": "github",
-"repo": "JuliusBrussee/caveman"}`), so installing it through us always
-fetches the current upstream version — nothing is vendored or copied.
-Claude Code-only; see [Antigravity CLI (agy)](#antigravity-cli-agy) below
-for why.
-
----
-
-### `ponytail`
-
-**Purpose:** Lazy senior dev mode — forces the simplest, shortest solution
-that actually works (YAGNI, stdlib first, no unrequested abstractions).
-
-Also third-party, from
-[DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail),
-installed the same external-source way as `caveman` above. Claude Code-only.
-
----
-
 ### `mattpocock-skills`
 
 **Purpose:** Matt Pocock's agent skills for real engineering — grilling,
 spec/ticket flows, TDD, code review, domain modelling and more.
 
-Also third-party, from
-[mattpocock/skills](https://github.com/mattpocock/skills), installed the
-same external-source way as `caveman`/`ponytail` above. Claude Code-only.
+This is a third-party plugin from
+[mattpocock/skills](https://github.com/mattpocock/skills), not maintained in
+this repo. Our marketplace entry points straight at that repo (via
+`source: {"source": "github", "repo": "mattpocock/skills"}`), so installing
+it through us always fetches the current upstream version — nothing is
+vendored or copied. Claude Code-only; see
+[Antigravity CLI (agy)](#antigravity-cli-agy) below for why.
 
 ---
 
@@ -443,7 +418,7 @@ the local content above:
 
 ```json
 {
-  "name": "caveman",
+  "name": "mattpocock-skills",
   "description": "...",
   "targets": ["claude-code"],
   "external": {
@@ -458,7 +433,7 @@ The generator emits that `source` object verbatim into
 at install time — it's never copied into this repo and never goes stale.
 A plugin with `external` must not also carry local skills/hooks/mcp/rules/
 commands/agents, and today only the `claude-code` target supports it (see
-[caveman](#caveman) and [ponytail](#ponytail) above).
+[mattpocock-skills](#mattpocock-skills) above).
 
 ### Restricting a Plugin (or a Skill) to Specific Targets
 
