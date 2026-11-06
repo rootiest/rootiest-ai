@@ -1,7 +1,7 @@
 ---
 name: ship-it
 description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, merges with approval, syncs main, prunes merged branches, and deploys.
-version: 2.3.0
+version: 2.4.0
 user-invocable: true
 author: Rootiest
 ---
@@ -33,7 +33,8 @@ exists:
   the section wins.
 - No file means every step uses its defaults.
 
-`templates/ship-it.md` in this skill's directory is a starting point listing every section.
+`templates/ship-it.md` in this skill's directory is a starting point listing every section, and
+`templates/example.md` is a filled-in example.
 
 ## Phases
 

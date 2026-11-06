@@ -1,7 +1,7 @@
 ---
 name: sync-it
 description: After a PR merges, waits for CI on the merge commit and fast-forwards local main, pulling in any automated post-merge commits.
-version: 2.3.0
+version: 2.4.0
 user-invocable: true
 author: Rootiest
 ---

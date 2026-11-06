@@ -1,7 +1,7 @@
 ---
 name: deploy-it
 description: Deploys what is on the default branch using the project's own deploy steps, with user approval unless the project's rules allow deploying without it, then verifies the deploy. Reports cleanly when there is nothing to deploy.
-version: 2.3.0
+version: 2.4.0
 user-invocable: true
 author: Rootiest
 ---
