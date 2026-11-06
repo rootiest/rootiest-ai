@@ -1,7 +1,7 @@
 ---
 name: verify-it
 description: Waits for CI on a commit (a PR head, or a merge commit after merging) with one blocking watcher and reports pass, fail, or no CI.
-version: 2.3.0
+version: 2.4.0
 user-invocable: true
 author: Rootiest
 ---

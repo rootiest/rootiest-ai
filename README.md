@@ -121,8 +121,15 @@ Each `##` section is read by the step of the same name (`## push-it`,
 `## verify-it`, …), and `## ship-it` holds rules for the whole run. A section
 overrides that step's defaults; anything left out keeps them. Commit
 `docs/ship-it.md` to share the rules, or use `AGENTS_ship-it.md` to keep them
-local; when both exist, `AGENTS_ship-it.md` is used. The bundled
-`skills/ship-it/templates/ship-it.md` lists every section.
+local; when both exist, `AGENTS_ship-it.md` is used.
+
+You don't have to write it from scratch: after a run that had to work something
+out, `/ship-it` offers to save what it learned, and you can ask an agent to
+write one for a project. To write or review one yourself, start from
+[the template](plugins/ship-it/skills/ship-it/templates/ship-it.md), which
+lists every section with what goes in it, or see
+[a filled-in example](plugins/ship-it/skills/ship-it/templates/example.md) for
+a small web app with staging and production deploys.
 
 #### `doc-it`
 

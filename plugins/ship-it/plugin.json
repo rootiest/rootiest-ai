@@ -1,6 +1,6 @@
 {
   "name": "ship-it",
   "description": "Ships work end to end: docs sync and code audit, PR, CI, merge, post-merge sync, branch cleanup and deploy. Each step is also its own skill (doc-it, push-it, verify-it, merge-it, sync-it, prune-it, deploy-it).",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "author": { "name": "Rootiest" }
 }
