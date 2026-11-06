@@ -24,7 +24,7 @@ content at all — a target-keyed map of Claude Code marketplace `source` object
 pointing at a third-party plugin we don't own or vendor, e.g.:
 
   {
-    "name": "caveman",
+    "name": "mattpocock-skills",
     "external": { "claude-code": { "source": "github", "repo": "owner/repo" } }
   }
 
