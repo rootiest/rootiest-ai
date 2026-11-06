@@ -32,12 +32,15 @@ regenerate commit into `main`. It only changes this machine.
 
 1. Check where `rootiest-ai` comes from: `claude plugin marketplace list`.
    - **A local folder** (`~/.claude/plugins/marketplaces/rootiest-ai-private`): it is a private
-     overlay build, which a plain update would only re-read unchanged. Deploy from the overlay
-     repo instead, following its own `## deploy-it`; it rebuilds on top of this repo's `main`.
-     Stop here.
+     overlay build, which a plain update would only re-read unchanged. Run `scripts/deploy.sh` in
+     the overlay repo, as its own `## deploy-it` describes; it pulls this repo's `main` and
+     rebuilds on top of it. Stop here.
    - **This repo** (GitHub or Gitea): continue.
 2. `claude plugin marketplace update rootiest-ai`
 3. Verify: `claude plugin list` shows each installed `@rootiest-ai` plugin at the version in its
    `plugins/<plugin>/plugin.json`. Update any that lag with
    `claude plugin update <plugin>@rootiest-ai`. List installed plugins that the marketplace no
    longer has and ask before uninstalling them.
+
+The GitHub copies of this repo are Gitea push mirrors that sync on every commit: nothing to deploy
+for them, and never push to them directly (the next sync overwrites it).
