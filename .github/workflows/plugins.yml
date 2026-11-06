@@ -14,9 +14,11 @@ on:
       - "scripts/**"
   workflow_dispatch: {}
 
+# Runs on Gitea only: racknerd-mini is a Gitea runner. GitHub copies of this repository see this file too;
+# the guard skips the jobs there instead of leaving them queued.
 jobs:
   validate:
-    if: github.event_name == 'pull_request'
+    if: github.server_url != 'https://github.com' && github.event_name == 'pull_request'
     runs-on: racknerd-mini
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +29,7 @@ jobs:
       - run: python3 scripts/generate_plugins.py --check
 
   generate:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.server_url != 'https://github.com' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: racknerd-mini
     steps:
       - uses: actions/checkout@v4
