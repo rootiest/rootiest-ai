@@ -1,7 +1,7 @@
 ---
 name: merge-it
 description: Merges one PR or a set of PRs in the right order (stacks bottom-up), after checking CI and reviews, with user approval unless the project's rules allow merging without it. Waits for post-merge automated commits between merges.
-version: 2.4.0
+version: 3.0.0
 user-invocable: true
 author: Rootiest
 ---
@@ -46,8 +46,8 @@ Re-check each PR right before its turn, since earlier merges change things.
 
 | Check | Gitea | GitHub |
 |-------|-------|--------|
-| Open and mergeable | `tea api "/repos/<owner>/<repo>/pulls/<n>"`: `.state == "open"`, `.mergeable == true` | `gh pr view <n> --json state,mergeable`: `OPEN`, `MERGEABLE` |
-| No changes requested | `tea api "/repos/<owner>/<repo>/pulls/<n>/reviews"`: no latest review per reviewer with `state == "REQUEST_CHANGES"` | `gh pr view <n> --json reviewDecision`: not `CHANGES_REQUESTED` |
+| Open and mergeable | `gt pr view <n> --json state,mergeable`: `open`, `true` | `gh pr view <n> --json state,mergeable`: `OPEN`, `MERGEABLE` |
+| No changes requested | `gt api "/repos/<owner>/<repo>/pulls/<n>/reviews"`: no latest review per reviewer with `state == "REQUEST_CHANGES"` | `gh pr view <n> --json reviewDecision`: not `CHANGES_REQUESTED` |
 | CI green | `/ship-it:verify-it` on the PR head commit | same |
 
 Skip the CI watch when the caller already watched this exact head commit and it passed. "No CI"
@@ -71,12 +71,12 @@ since everything stacked above it has to wait anyway.
 
 ## Step 4: Merge
 Use the project's merge method, else the repository default (merge commit).
-- Gitea: `tea pr merge <n> --style <merge|squash|rebase|rebase-merge>`
+- Gitea: `gt pr merge <n> --method <merge|squash|rebase|rebase-merge>`
 - GitHub: `gh pr merge <n> --<merge|squash|rebase>`
 
 Do not delete the head branch here; `/ship-it:prune-it` does that. Then confirm the merge and
 get the merge commit:
-- Gitea: `tea api "/repos/<owner>/<repo>/pulls/<n>" | jq -r '.merged, .merge_commit_sha'`
+- Gitea: `gt pr view <n> -q '.merged, .merge_commit_sha'`
 - GitHub: `gh pr view <n> --json state,mergeCommit -q '.state, .mergeCommit.oid'`
 
 ## Step 5: Before the next PR
@@ -89,7 +89,7 @@ Skip this step after the last PR.
    then look again. Don't continue while one is still expected.
 2. **Retarget stacked children.** A child whose base was the merged PR's head moves to the
    parent's base:
-   - Gitea: `tea api -X PATCH "/repos/<owner>/<repo>/pulls/<child>" -f base=<new-base>`
+   - Gitea: `gt pr edit <child> --base <new-base>`
    - GitHub: `gh pr edit <child> --base <new-base>`
 3. **Squash or rebase merges** leave the child carrying the parent's original commits, which
    then conflict. Rebase the child onto the new base, dropping the parent's commits:

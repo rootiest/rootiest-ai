@@ -1,7 +1,7 @@
 ---
 name: ship-it
 description: Ships pending work end to end - syncs docs and audits code, opens a PR, waits for CI, merges with approval, syncs main, prunes merged branches, and deploys.
-version: 2.4.0
+version: 3.0.0
 user-invocable: true
 author: Rootiest
 ---

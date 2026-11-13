@@ -24,7 +24,7 @@ DESCRIPTION
         unmerged commits are kept and reported unless --force is given.
       - Remote branches merged into <remote>/<default>, unless they are the
         head of an open pull request (a local branch tracking one is kept
-        too). Open PRs are listed with whatever works: gh, tea or glab,
+        too). Open PRs are listed with whatever works: gh, gt or glab,
         else curl with a token from the environment bound to the remote's
         host, else anonymous curl for a public repository (GitHub, Gitea/
         Forgejo, GitLab, self-hosted included). If none works, remote
@@ -249,13 +249,13 @@ forge_token() {
 }
 
 # Print the head branch names on one page of open PRs (MRs). <method> is cli
-# (gh/tea/glab scoped to <host>), token (curl with forge_token) or anon (curl,
+# (gh/gt/glab scoped to <host>), token (curl with forge_token) or anon (curl,
 # public repos). Fails if the method is unavailable or the response is not a
 # JSON array, which is also what the wrong forge's API returns, so a wrong
 # guess just fails over. Redirects are never followed, and the token goes to
 # curl on stdin, never on its command line.
 pr_page() {
-  local method=$1 forge=$2 host=$3 path=$4 page=$5 q api auth body tok login
+  local method=$1 forge=$2 host=$3 path=$4 page=$5 q api auth body tok
   local filter='.[].head | .ref, (.label // "" | sub("^[^:]*:"; ""))'
   case $forge in
     github)
@@ -290,14 +290,14 @@ pr_page() {
           return 0
           ;;
         gitea)
-          command -v tea >/dev/null || return 1
-          # Use the login for this host, not tea's default login.
-          login=$(tea login list -o tsv </dev/null 2>/dev/null |
-            while IFS=$'\t' read -r name url _; do
-              if [ "$(url_host "$url" 2>/dev/null)" = "$host" ]; then printf '%s\n' "$name"; break; fi
-            done)
-          [ -n "$login" ] || return 1
-          body=$(tea api --login "$login" "/$q" </dev/null 2>/dev/null) || return 1
+          # gt filters with its built-in jq, like gh. Only gt's own login for this host
+          # is used: without GITEA_TOKEN, which may belong to another instance (the
+          # token method below binds it to its host).
+          command -v gt >/dev/null || return 1
+          env -u GITEA_TOKEN gt api --host "https://$host" "$q" \
+            -q "if type == \"array\" then $filter else error(\"not a list\") end" \
+            </dev/null 2>/dev/null || return 1
+          return 0
           ;;
         gitlab)
           command -v glab >/dev/null || return 1
