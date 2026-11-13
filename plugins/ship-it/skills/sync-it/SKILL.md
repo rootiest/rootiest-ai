@@ -1,7 +1,7 @@
 ---
 name: sync-it
 description: After a PR merges, waits for CI on the merge commit and fast-forwards local main, pulling in any automated post-merge commits.
-version: 2.4.0
+version: 3.0.0
 user-invocable: true
 author: Rootiest
 ---
@@ -35,7 +35,7 @@ there were none.
 
 ## Steps
 1. Get the merge commit from the PR, not from `origin/main` (later commits may already be there):
-   - Gitea: `tea api "/repos/<owner>/<repo>/pulls/<n>" | jq -r .merge_commit_sha`
+   - Gitea: `gt pr view <n> -q .merge_commit_sha`
    - GitHub: `gh pr view <n> --json mergeCommit -q .mergeCommit.oid`
    If the PR is not merged, report that and stop.
 2. Watch CI on that commit with `/ship-it:verify-it`, passing the merge commit SHA. Skip this

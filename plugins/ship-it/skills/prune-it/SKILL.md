@@ -1,7 +1,7 @@
 ---
 name: prune-it
 description: Syncs the default branch and deletes local and remote branches that are already merged or whose remote branch is gone.
-version: 2.4.0
+version: 3.0.0
 user-invocable: true
 author: Rootiest
 ---
@@ -55,7 +55,7 @@ Activate this skill when one of the following is met:
 - `git` and `bash`.
 - Nothing else is required for local cleanup. To delete **remote** branches, the script must list
   open PRs, and it tries every way it knows until one works. It needs none of them in particular:
-  1. The forge's CLI, scoped to the remote's host: `gh`, `tea`, or `glab`.
+  1. The forge's CLI, scoped to the remote's host: `gh`, `gt` (the Gitea CLI), or `glab`.
   2. `curl` with a token from the environment, sent only to the host the token belongs to:
      `GH_TOKEN`/`GITHUB_TOKEN`/`GITHUB_PERSONAL_ACCESS_TOKEN` (github.com),
      `GITEA_TOKEN`/`GITEA_ACCESS_TOKEN`/`FORGEJO_TOKEN` (the host in `GITEA_HOST`/`GITEA_URL`),

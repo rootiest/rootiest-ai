@@ -106,6 +106,10 @@ fails its gate. Every sub-skill can also be run on its own:
 
 **Use when:** you say "Ship this," "Publish my changes," or invoke `/ship-it`.
 
+**Forge CLIs:** `gh` on GitHub, and `gt` on Gitea: the official
+[Gitea CLI](https://gitea.com/gitea/cli), which replaced the deprecated
+`tea`. Log in once with `gt auth login`.
+
 #### Project instructions
 
 A project can tell each step how it ships, so the agent doesn't have to work
@@ -165,7 +169,7 @@ Takes uncommitted local work to an open Pull Request:
 Waits on a commit with a single background watcher instead of sleep-polling.
 On GitHub it uses `gh pr checks --watch --fail-fast` for a PR head, or
 `gh run watch` for a merge commit. On Gitea it runs the bundled
-`scripts/tea-ci-watch.sh` (requires `tea` and `jq`), which waits until every
+`scripts/gitea-ci-watch.sh` (requires `gt`, the Gitea CLI, and `jq`), which waits until every
 Actions run for the commit — including runs still queued, which Gitea does
 not yet report as commit statuses — has completed and the combined commit
 status is no longer pending. It fails fast on the first failed or cancelled
@@ -210,7 +214,7 @@ then deletes:
 - **Remote branches** merged into `origin/<default>`, unless they are the
   head of an open PR.
 
-Open PRs are listed with whatever works: `gh`, `tea` or `glab`, else
+Open PRs are listed with whatever works: `gh`, `gt` or `glab`, else
 `curl` with a token from the environment (sent only to the host it belongs
 to), else anonymous `curl` for a public repository. GitHub, Gitea/Forgejo
 and GitLab are supported, self-hosted included. If nothing works, no remote

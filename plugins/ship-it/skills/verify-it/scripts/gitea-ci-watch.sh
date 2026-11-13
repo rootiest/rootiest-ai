@@ -9,13 +9,13 @@ set -euo pipefail
 show_help() {
   cat <<'EOF'
 NAME
-    tea-ci-watch - Block execution until Gitea Actions/commit checks complete
+    gitea-ci-watch - Block execution until Gitea Actions/commit checks complete
 
 SYNOPSIS
-    tea-ci-watch [OPTIONS] <owner/repo> <commit-sha> [timeout_seconds]
+    gitea-ci-watch [OPTIONS] <owner/repo> <commit-sha> [timeout_seconds]
 
 DESCRIPTION
-    Polls Gitea (via 'tea api') and blocks until every check on the commit has
+    Polls Gitea (via 'gt api', the Gitea CLI) and blocks until every check on the commit has
     finished. Designed for automated CI pipelines and agent workflows: run it
     once, in the background, and act on the exit code instead of sleep-polling.
 
@@ -39,11 +39,13 @@ OPTIONS
     -h, --help          Display this help documentation and exit
 
 ENVIRONMENT VARIABLES
-    TEA_CI_WATCH_GRACE  Seconds to wait for any check to register before
-                        concluding the commit has no CI (default: 60)
+    GITEA_CI_WATCH_GRACE  Seconds to wait for any check to register before
+                          concluding the commit has no CI (default: 60)
 
 AUTHENTICATION
-    Uses the default 'tea' login. Run 'tea login add' if none is configured.
+    Uses gt's login (gt auth login) for the instance gt selects: GITEA_INSTANCE_URL,
+    then the clone's remote, then gt's default instance. GITEA_TOKEN works too, with
+    GITEA_INSTANCE_URL naming its instance.
 
 RETURNS
     0                   All checks passed (success, warning, or skipped)
@@ -54,8 +56,8 @@ RETURNS
     124                 Timeout reached with checks still pending
 
 EXAMPLES
-    tea-ci-watch rootiest/rootiest-ai a1b2c3d4e5f6
-    tea-ci-watch rootiest/rootiest-ai "$(git rev-parse HEAD)" 300
+    gitea-ci-watch rootiest/rootiest-ai a1b2c3d4e5f6
+    gitea-ci-watch rootiest/rootiest-ai "$(git rev-parse HEAD)" 300
 EOF
 }
 
@@ -68,12 +70,12 @@ fi
 # Validate positional inputs
 if [ "$#" -lt 2 ]; then
   echo "Error: Missing required arguments." >&2
-  echo "Run 'tea-ci-watch --help' for usage." >&2
+  echo "Run 'gitea-ci-watch --help' for usage." >&2
   exit 2
 fi
 
 # Ensure required runtime dependencies exist in PATH
-for bin in jq tea; do
+for bin in jq gt; do
   if ! command -v "$bin" >/dev/null 2>&1; then
     echo "Error: Required binary '$bin' is not installed or not in PATH." >&2
     exit 2
@@ -83,16 +85,16 @@ done
 REPO="$1"
 SHA="$2"
 TIMEOUT="${3:-1200}"
-GRACE="${TEA_CI_WATCH_GRACE:-60}"
+GRACE="${GITEA_CI_WATCH_GRACE:-60}"
 INTERVAL=5
 
 echo "Waiting for CI completion on ${REPO}@${SHA:0:7}..." >&2
 
-# Fetch a Gitea API path as JSON. 'tea api' exits 0 even on HTTP errors, so the
-# caller-supplied jq probe (which must succeed on a valid body) is the error signal.
+# Fetch a Gitea API path as JSON. 'gt api' fails on an HTTP error; the caller-supplied
+# jq probe (which must succeed on a valid body) also catches an unexpected answer.
 fetch() {
   local path="$1" probe="$2" body
-  if ! body=$(tea api "$path" 2>&1) || ! jq -e "$probe" <<<"$body" >/dev/null 2>&1; then
+  if ! body=$(gt api "$path" </dev/null 2>&1) || ! jq -e "$probe" <<<"$body" >/dev/null 2>&1; then
     echo "ERROR: Request ${path} failed for ${REPO}@${SHA:0:7}: ${body}" >&2
     exit 2
   fi

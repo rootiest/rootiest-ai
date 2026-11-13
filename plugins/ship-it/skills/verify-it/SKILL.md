@@ -1,7 +1,7 @@
 ---
 name: verify-it
 description: Waits for CI on a commit (a PR head, or a merge commit after merging) with one blocking watcher and reports pass, fail, or no CI.
-version: 2.4.0
+version: 3.0.0
 user-invocable: true
 author: Rootiest
 ---
@@ -41,11 +41,11 @@ there were none.
   timeout longer than the watcher's.
 
 ## Gitea
-Run the bundled watcher, `scripts/tea-ci-watch.sh` in this skill's directory (the directory
-holding this SKILL.md). Use its absolute path; it is not on `PATH`. Requires `tea` (logged in)
+Run the bundled watcher, `scripts/gitea-ci-watch.sh` in this skill's directory (the directory
+holding this SKILL.md). Use its absolute path; it is not on `PATH`. Requires `gt` (logged in)
 and `jq`.
 ```bash
-bash "<skill-dir>/scripts/tea-ci-watch.sh" "<owner>/<repo>" "<commit-sha>"
+bash "<skill-dir>/scripts/gitea-ci-watch.sh" "<owner>/<repo>" "<commit-sha>"
 ```
 
 | Exit | Meaning | Action |
