@@ -39,6 +39,19 @@
       "source": "./dist/claude-code/github-mcp"
     },
     {
+      "name": "inline-images",
+      "description": "Draws PNG images inline in the Claude Code terminal (Ghostty, kitty, tmux with passthrough): the ones Claude reads, the ones it sends you and the ones you paste. By Brian Pravato (kbrianps/claude-inline-images); this build adds pasted images and is installed from the rootiest/claude-inline-images fork.",
+      "author": {
+        "name": "Brian Pravato",
+        "url": "https://github.com/kbrianps"
+      },
+      "source": {
+        "source": "github",
+        "repo": "rootiest/claude-inline-images",
+        "ref": "feat/pasted-images"
+      }
+    },
+    {
       "name": "mattpocock-skills",
       "description": "Matt Pocock's agent skills for real engineering from mattpocock/skills \u2014 grilling, spec/ticket flows, TDD, code review, domain modelling and more. Installed straight from the upstream repo, not vendored here.",
       "author": {
