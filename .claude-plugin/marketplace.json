@@ -46,8 +46,8 @@
         "url": "https://github.com/kbrianps"
       },
       "source": {
-        "source": "github",
-        "repo": "rootiest/claude-inline-images",
+        "source": "url",
+        "url": "https://github.com/rootiest/claude-inline-images.git",
         "ref": "feat/pasted-images"
       }
     },
