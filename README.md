@@ -19,6 +19,7 @@ from one source tree and published as a native marketplace for both tools.
   - [github-mcp](#github-mcp)
   - [gitea-mcp](#gitea-mcp)
   - [mattpocock-skills](#mattpocock-skills)
+  - [inline-images](#inline-images)
 - [Installation](#installation)
   - [Claude Code](#claude-code)
   - [Antigravity CLI (agy)](#antigravity-cli-agy)
@@ -302,6 +303,24 @@ this repo. Our marketplace entry points straight at that repo (via
 it through us always fetches the current upstream version — nothing is
 vendored or copied. Claude Code-only; see
 [Antigravity CLI (agy)](#antigravity-cli-agy) below for why.
+
+---
+
+### `inline-images`
+
+**Purpose:** Draw PNG images inline in the Claude Code terminal instead of a
+one-line `[image] file.png` reference: the images Claude reads, the ones it
+sends you, and the ones you paste into the prompt (drawn under your message
+once you send it).
+
+`inline-images` is by Brian Pravato
+([kbrianps/claude-inline-images](https://github.com/kbrianps/claude-inline-images),
+MIT). Our marketplace entry installs it from the
+[rootiest/claude-inline-images](https://github.com/rootiest/claude-inline-images)
+fork's `feat/pasted-images` branch, which adds the pasted images; nothing is
+vendored here. It needs a terminal that speaks the kitty graphics protocol
+(Ghostty, kitty, or tmux with passthrough) and Claude Code 2.1.287 or newer.
+Claude Code-only.
 
 ---
 
