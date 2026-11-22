@@ -423,7 +423,10 @@ verbatim where the two tools' schemas diverge:
 
 - MCP: the shared `mcpServers` shape passes straight through to Claude's
   `.mcp.json`; a `url`/`serverUrl` remote entry becomes agy's
-  `serverUrl` field in `mcp_config.json`.
+  `serverUrl` field in `mcp_config.json` (agy gets only the URL, no headers).
+  A server may carry an `"agy"` object that replaces the whole entry for agy
+  and is left out of Claude's `.mcp.json`: for example a remote server with
+  an `Authorization` header for Claude Code and a local stdio server for agy.
 - Hooks: Claude Code has far more event types than agy documents. Events
   agy doesn't support (`SessionStart`, `TaskCreated`, etc.) simply stay
   Claude-only — the agy output only carries `PreToolUse`/`PostToolUse`

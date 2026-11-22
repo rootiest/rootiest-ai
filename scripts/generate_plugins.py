@@ -14,7 +14,8 @@ A "plugin" is a directory under `plugins/<name>/` that may bundle any mix of:
                          of its sibling skills — narrowed to, never wider than, the
                          plugin's own `targets`)
   - hooks.json          (canonical, Claude-shaped: {"<EventName>": [<matcher-group>, ...]})
-  - mcp.json            ({"mcpServers": {...}}, shared shape across targets)
+  - mcp.json            ({"mcpServers": {...}}, shared shape across targets; a server
+                         may carry an "agy" object that replaces it for agy only)
   - rules/AGENTS.md     (agy-only; ignored by the Claude Code target)
   - commands/*.md       (Claude Code-only slash commands)
   - agents/*.md         (Claude Code-only subagents)
@@ -354,6 +355,9 @@ def translate_hooks_for_agy(hooks: dict, plugin_name: str) -> "dict | None":
 def translate_mcp_for_agy(mcp: dict) -> dict:
     servers = {}
     for name, cfg in mcp.get("mcpServers", {}).items():
+        # An "agy" object replaces the whole entry for agy, e.g. a local stdio server where
+        # Claude Code uses a remote one whose auth header agy's serverUrl entry cannot carry.
+        cfg = cfg.get("agy", cfg)
         if "command" in cfg:
             out = {"command": cfg["command"]}
             if "args" in cfg:
@@ -409,7 +413,14 @@ def write_claude_plugin(plugin: dict, dest: Path) -> bool:
         )
 
     if plugin["mcp"] is not None:
-        (dest / ".mcp.json").write_text(json.dumps(plugin["mcp"], indent=2) + "\n", encoding="utf-8")
+        claude_mcp = {
+            **plugin["mcp"],
+            "mcpServers": {
+                name: {k: v for k, v in cfg.items() if k != "agy"}
+                for name, cfg in plugin["mcp"].get("mcpServers", {}).items()
+            },
+        }
+        (dest / ".mcp.json").write_text(json.dumps(claude_mcp, indent=2) + "\n", encoding="utf-8")
 
     return True
 
